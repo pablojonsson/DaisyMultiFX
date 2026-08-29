@@ -3,7 +3,6 @@
 #define CHORUS_EFFECT
 
 #include "daisysp.h"
-#include <algorithm>
 
 #ifdef __cplusplus
 namespace CustomEffects

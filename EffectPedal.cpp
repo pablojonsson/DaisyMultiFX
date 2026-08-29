@@ -1,5 +1,6 @@
 #include "DSP/StateVariableFilter.h"
 #include "Effects/Chorus.h"
+#include "Effects/Delay.h"
 #include "Effects/Distortion.h"
 #include "Effects/Reverb.h"
 #include "daisy_seed.h"
@@ -16,6 +17,7 @@ Switch switch1;
 Switch switch2;
 
 CustomEffects::Distortion distortion;
+CustomEffects::Delay delay;
 CustomEffects::Chorus chorus;
 CustomEffects::Reverb reverb;
 CustomDSP::StateVariableFilter svf;
@@ -31,6 +33,7 @@ enum class Effect
     Chorus,
     Reverb,
     Filter,
+    Delay,
     Count
 };
 
@@ -52,7 +55,8 @@ Color::PresetColor GetEffectColor(Effect effect)
 
     case Effect::Filter:
         return Color::PresetColor::WHITE;
-
+    case Effect::Delay:
+        return Color::PresetColor::PURPLE;
     default:
         return Color::PresetColor::RED;
     }
@@ -86,7 +90,9 @@ void HandleEncoder()
         case Effect::Reverb:
             reverb.Reset();
             break;
-
+        case Effect::Delay:
+            delay.Reset();
+            break;
         default:
             break;
         }
@@ -223,8 +229,16 @@ void ApplyEffect(AudioHandle::InputBuffer &in, AudioHandle::OutputBuffer &out, s
         float resonance_shape = pot2_value * pot2_value;
         float q = 0.5f + resonance_shape * 9.5f;
         svf.SetResonance(q);
+    }
 
-        svf.SetMode(CustomDSP::FilterMode::HighPass);
+    case Effect::Delay:
+    {
+        float shaped = pot1_value * pot1_value;
+        float delay_ms = 20.0f + shaped * 475.0f;
+        delay.SetDelayTime(delay_ms);
+
+        float feedback = pot2_value * 0.95f;
+        delay.SetFeedback(feedback);
     }
 
     default:
@@ -259,6 +273,13 @@ void ApplyEffect(AudioHandle::InputBuffer &in, AudioHandle::OutputBuffer &out, s
         case Effect::Filter:
         {
             svf.Process(in[0][i], in[1][i], out[0][i], out[1][i]);
+
+            break;
+        }
+
+        case Effect::Delay:
+        {
+            delay.Process(in[0][i], in[1][i], out[0][i], out[1][i]);
 
             break;
         }
@@ -316,6 +337,7 @@ void InitEffects()
     chorus.Init(hw.AudioSampleRate());
     reverb.Init(hw.AudioSampleRate());
     svf.Init(hw.AudioSampleRate());
+    delay.Init(hw.AudioSampleRate());
 }
 
 int main(void)

@@ -6,6 +6,7 @@ CPP_SOURCES = EffectPedal.cpp \
               Effects/Distortion.cpp \
               Effects/Chorus.cpp \
               Effects/Reverb.cpp \
+              Effects/Delay.cpp \
               DSP/StateVariableFilter.cpp \
               DSP/MasterDiffuser.cpp \
               DSP/ReverbFeedback.cpp \

@@ -14,7 +14,7 @@ void Reverb::Init(float sample_rate)
     reverb_feedback.setFeedback(feedback);
 }
 
-void Reverb::Process(float inL, float inR, float &outL, float &outR)
+__attribute__((noinline)) void Reverb::Process(float inL, float inR, float &outL, float &outR)
 {
     float diffL, diffR;
     float wetL, wetR;

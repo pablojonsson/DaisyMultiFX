@@ -2,6 +2,7 @@
 #ifndef REVERB_FEEDBACK_DSP
 #define REVERB_FEEDBACK_DSP
 
+#include "./Diffusers/DiffuserMath.h"
 #include "daisysp.h"
 #include <array>
 
@@ -35,11 +36,10 @@ class ReverbFeedback
     float rate;  // Hz
     float depth; // samples
 
-    float filter_1, filter_2, filter_3, filter_4;
-    float filter_5, filter_6, filter_7, filter_8;
+    float filter[8];
 
-    float lfo_phase_1, lfo_phase_2, lfo_phase_3, lfo_phase_4;
-    float lfo_phase_5, lfo_phase_6, lfo_phase_7, lfo_phase_8;
+    float lfo_phase[8];
+    float phase_increment[8];
 
     daisysp::DelayLine<float, 1500> delay_1;
     daisysp::DelayLine<float, 1700> delay_2;

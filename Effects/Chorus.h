@@ -38,6 +38,12 @@ class Chorus
     // write_index:
     int write_index;
 
+    float lfo_sin;
+    float lfo_cos;
+
+    float sin_increment;
+    float cos_increment;
+
     // Delay buffers to write and read from. Handles fractional buffer indeces and interpolates
     // them.
     daisysp::DelayLine<float, 9600> left_delay_buffer;

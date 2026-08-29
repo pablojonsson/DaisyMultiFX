@@ -2,6 +2,7 @@
 #ifndef DIFFUSER_4_DSP
 #define DIFFUSER_4_DSP
 
+#include "./DiffuserMath.h"
 #include "daisysp.h"
 
 #ifdef __cplusplus
@@ -18,20 +19,6 @@ class Diffuser4
     void Process(float inL, float inR, float &outL, float &outR);
 
   private:
-    void Duplicate(float in);
-
-    void Shuffle();
-
-    void Hadamard();
-
-    float signal_1;
-    float signal_2;
-    float signal_3;
-    float signal_4;
-    float signal_5;
-    float signal_6;
-    float signal_7;
-    float signal_8;
     float sampling_freq;
     float feedback = 0.5f;
     daisysp::DelayLine<float, 74> delay_1;

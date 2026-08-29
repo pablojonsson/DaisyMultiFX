@@ -1,5 +1,4 @@
 #include "Distortion.h"
-#include <cmath>
 
 using namespace CustomEffects;
 
@@ -11,10 +10,17 @@ void Distortion::Init(float sample_rate)
     tone_cutoff = 20000;
 }
 
-float Distortion::Process(float in)
+__attribute__((noinline)) float Distortion::Process(float in)
 {
-    float out;
-    out = (tanh(drive * in));
+    float x = drive * in;
+
+    if (x > 1.0f)
+        x = 1.0f;
+    else if (x < -1.0f)
+        x = -1.0f;
+
+    float out = x - (x * x * x) / 3.0f;
+
     return out * volume;
 }
 

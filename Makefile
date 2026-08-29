@@ -8,18 +8,25 @@ CPP_SOURCES = EffectPedal.cpp \
               Effects/Reverb.cpp \
               DSP/MasterDiffuser.cpp \
               DSP/ReverbFeedback.cpp \
+              DSP/Diffusers/DiffuserMath.cpp \
               DSP/Diffusers/Diffuser2.cpp \
               DSP/Diffusers/Diffuser4.cpp \
               DSP/Diffusers/Diffuser8.cpp \
               DSP/Diffusers/Diffuser16.cpp
 
 # Optimization
-OPT = -O3
+OPT = -Os
 
 # Library Locations
 LIBDAISY_DIR = ../../libDaisy/
 DAISYSP_DIR = ../../DaisySP/
 
-# Core location, and generic Makefile.
+# Core location
 SYSTEM_FILES_DIR = $(LIBDAISY_DIR)/core
+
 include $(SYSTEM_FILES_DIR)/Makefile
+
+# Add custom flags AFTER Daisy Makefile
+CFLAGS += -flto
+CPPFLAGS += -flto
+LDFLAGS += -flto

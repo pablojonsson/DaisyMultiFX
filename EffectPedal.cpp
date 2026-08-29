@@ -155,7 +155,10 @@ void ApplyEffect(AudioHandle::InputBuffer &in, AudioHandle::OutputBuffer &out, s
 
     case Effect::Chorus:
     {
-        float rate = 0.2f * powf(15.0f, pot1_value);
+        // float rate = 0.2f * powf(15.0f, pot1_value);
+        float shaped = pot1_value * pot1_value;
+        float rate = 0.2f + shaped * 14.8f;
+
         float depth = 0.1f + pot2_value * 2.4f;
 
         chorus.setRate(rate);
@@ -166,14 +169,23 @@ void ApplyEffect(AudioHandle::InputBuffer &in, AudioHandle::OutputBuffer &out, s
 
     case Effect::Reverb:
     {
-        float decay_time = 0.3f * powf(20.0f, pot1_value);
+        // float decay_time = 0.3f * powf(20.0f, pot1_value);
 
-        float average_delay = 0.045f;
+        float shaped = pot1_value * pot1_value;
 
-        float feedback = powf(10.0f, (-3.0f * average_delay) / decay_time);
+        float decay_time = 0.3f + shaped * 19.7f;
 
-        reverb.setFeedback(feedback);
         float damping = 0.45f - pot2_value * 0.40f;
+
+        float x = -0.31084898f / decay_time;
+
+        float x2 = x * x;
+        float x3 = x2 * x;
+        float x4 = x3 * x;
+        float x5 = x4 * x;
+
+        float feedback =
+            1.0f + x + 0.5f * x2 + 0.16666667f * x3 + 0.04166667f * x4 + 0.008333333f * x5;
 
         reverb.setFeedback(feedback);
         reverb.setDamping(damping);

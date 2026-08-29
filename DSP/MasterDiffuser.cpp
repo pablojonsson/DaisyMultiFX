@@ -11,7 +11,8 @@ void MasterDiffuser::Init(float sample_rate)
     diff16.Init(sampling_freq);
 }
 
-void MasterDiffuser::Process(float inL, float inR, float &outL, float &outR)
+__attribute__((noinline)) void MasterDiffuser::Process(float inL, float inR, float &outL,
+                                                       float &outR)
 {
     float l1, r1;
     float l2, r2;

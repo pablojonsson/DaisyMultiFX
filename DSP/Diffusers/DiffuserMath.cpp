@@ -2,7 +2,7 @@
 
 namespace CustomDSP
 {
-__attribute__((noinline)) void DiffuserMath::Hadamard(float x[8])
+void DiffuserMath::Hadamard(float x[8])
 {
     float a0 = x[0] + x[1];
     float a1 = x[0] - x[1];
@@ -22,14 +22,16 @@ __attribute__((noinline)) void DiffuserMath::Hadamard(float x[8])
     float b6 = a4 - a6;
     float b7 = a5 - a7;
 
-    x[0] = b0 + b4;
-    x[1] = b1 + b5;
-    x[2] = b2 + b6;
-    x[3] = b3 + b7;
-    x[4] = b0 - b4;
-    x[5] = b1 - b5;
-    x[6] = b2 - b6;
-    x[7] = b3 - b7;
+    float norm = 0.35355339059f;
+
+    x[0] = (b0 + b4) * norm;
+    x[1] = (b1 + b5) * norm;
+    x[2] = (b2 + b6) * norm;
+    x[3] = (b3 + b7) * norm;
+    x[4] = (b0 - b4) * norm;
+    x[5] = (b1 - b5) * norm;
+    x[6] = (b2 - b6) * norm;
+    x[7] = (b3 - b7) * norm;
 }
 
 void DiffuserMath::Process(float inL, float inR, float feedback, const float delayed[8],

@@ -14,14 +14,13 @@ void Reverb::Init(float sample_rate)
     reverb_feedback.setFeedback(feedback);
 }
 
-__attribute__((noinline)) void Reverb::Process(float inL, float inR, float &outL, float &outR)
+void Reverb::Process(float inL, float inR, float &outL, float &outR)
 {
     float diffL, diffR;
     float wetL, wetR;
 
     diffuser.Process(inL, inR, diffL, diffR);
     reverb_feedback.Process(diffL, diffR, wetL, wetR);
-
     outL = inL + wetL * mix;
     outR = inR + wetR * mix;
 }
@@ -41,4 +40,10 @@ void Reverb::setFeedback(float amount)
 void Reverb::setMix(float amount)
 {
     mix = amount;
+}
+
+void Reverb::Reset()
+{
+    diffuser.Reset();
+    reverb_feedback.Reset();
 }

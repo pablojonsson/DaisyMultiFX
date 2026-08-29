@@ -10,7 +10,7 @@ void Distortion::Init(float sample_rate)
     tone_cutoff = 20000;
 }
 
-__attribute__((noinline)) float Distortion::Process(float in)
+float Distortion::Process(float in)
 {
     float x = drive * in;
 

@@ -34,6 +34,7 @@ enum class Effect
 };
 
 Effect currEffect = Effect::Distortion;
+Effect prevEffect;
 
 Color::PresetColor GetEffectColor(Effect effect)
 {
@@ -73,6 +74,24 @@ void HandleEncoder()
 
     newIndex = ((newIndex % numEffects) + numEffects) % numEffects;
 
+    if (currEffect != prevEffect)
+    {
+        switch (prevEffect)
+        {
+        case Effect::Chorus:
+            chorus.Reset();
+            break;
+
+        case Effect::Reverb:
+            reverb.Reset();
+            break;
+
+        default:
+            break;
+        }
+
+        prevEffect = currEffect;
+    }
     currEffect = static_cast<Effect>(newIndex);
 
     Color c;
@@ -169,7 +188,6 @@ void ApplyEffect(AudioHandle::InputBuffer &in, AudioHandle::OutputBuffer &out, s
 
     case Effect::Reverb:
     {
-        // float decay_time = 0.3f * powf(20.0f, pot1_value);
 
         float shaped = pot1_value * pot1_value;
 

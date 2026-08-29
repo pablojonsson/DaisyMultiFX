@@ -18,6 +18,8 @@ class Diffuser8
 
     void Process(float inL, float inR, float &outL, float &outR);
 
+    void Reset();
+
   private:
     float sampling_freq;
     float feedback = 0.5f;

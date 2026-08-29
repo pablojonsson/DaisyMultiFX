@@ -24,7 +24,7 @@ void Chorus::Init(float sample_rate)
     cos_increment = cosf(phase_increment);
 }
 
-__attribute__((noinline)) void Chorus::Process(float inL, float inR, float &outL, float &outR)
+void Chorus::Process(float inL, float inR, float &outL, float &outR)
 {
     float samples_per_ms = sampling_freq * 0.001f;
     float left_delay_samples = (base_delay + lfo_sin * depth) * samples_per_ms;
@@ -63,4 +63,12 @@ void Chorus::setRate(float freq)
     if (fabsf(freq - rate) > 0.001f)
         phase_increment = (TWO_PI_F * freq) / sampling_freq;
     rate = freq;
+}
+
+void Chorus::Reset()
+{
+    left_delay_buffer.Reset();
+    right_delay_buffer.Reset();
+    lfo_cos = 1.0f;
+    lfo_sin = 0.0f;
 }

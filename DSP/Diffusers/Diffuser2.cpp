@@ -48,3 +48,15 @@ void Diffuser2::Process(float inL, float inR, float &outL, float &outR)
     delay_7.Write(write[6]);
     delay_8.Write(write[7]);
 }
+
+void Diffuser2::Reset()
+{
+    delay_1.Reset();
+    delay_2.Reset();
+    delay_3.Reset();
+    delay_4.Reset();
+    delay_5.Reset();
+    delay_6.Reset();
+    delay_7.Reset();
+    delay_8.Reset();
+}

@@ -26,6 +26,8 @@ class Chorus
 
     void setDepth(float amount);
 
+    void Reset();
+
   private:
     // sampling_freq: the sampling frequency of the audio processor
     // rate: the freq of the lfo in hZ .2-2.0

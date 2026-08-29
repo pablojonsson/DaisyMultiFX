@@ -20,6 +20,8 @@ class MasterDiffuser
 
     void Process(float inL, float inR, float &outL, float &outR);
 
+    void Reset();
+
   private:
     float sampling_freq;
     Diffuser2 diff2;

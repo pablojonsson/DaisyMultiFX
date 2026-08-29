@@ -26,24 +26,6 @@ void ReverbFeedback::Init(float sample_rate)
     delay_7.SetDelay(2753.0f);
     delay_8.SetDelay(2953.0f);
 
-    filter[0] = 0.0f;
-    filter[1] = 0.0f;
-    filter[2] = 0.0f;
-    filter[3] = 0.0f;
-    filter[4] = 0.0f;
-    filter[5] = 0.0f;
-    filter[6] = 0.0f;
-    filter[7] = 0.0f;
-
-    lfo_phase[0] = 0.0f;
-    lfo_phase[1] = 0.0f;
-    lfo_phase[2] = 0.0f;
-    lfo_phase[3] = 0.0f;
-    lfo_phase[4] = 0.0f;
-    lfo_phase[5] = 0.0f;
-    lfo_phase[6] = 0.0f;
-    lfo_phase[7] = 0.0f;
-
     depth = 2.0f;
 
     const float rates[8] = {0.11f, 0.13f, 0.17f, 0.19f, 0.23f, 0.29f, 0.31f, 0.37f};
@@ -51,12 +33,12 @@ void ReverbFeedback::Init(float sample_rate)
     for (int i = 0; i < 8; i++)
     {
         lfo_phase[i] = 0.0f;
+        filter[i] = 0.0f;
         phase_increment[i] = TWO_PI_F * rates[i] / sampling_freq;
     }
 }
 
-__attribute__((noinline)) void ReverbFeedback::Process(float inL, float inR, float &outL,
-                                                       float &outR)
+void ReverbFeedback::Process(float inL, float inR, float &outL, float &outR)
 {
 
     float mod[8];
@@ -97,11 +79,6 @@ __attribute__((noinline)) void ReverbFeedback::Process(float inL, float inR, flo
 
     for (int i = 0; i < 8; i++)
     {
-        fb[i] *= 0.353553f;
-    }
-
-    for (int i = 0; i < 8; i++)
-    {
         filter[i] += damping * (fb[i] - filter[i]);
     }
 
@@ -127,4 +104,21 @@ void ReverbFeedback::setFeedback(float amount)
 void ReverbFeedback::setDamping(float amount)
 {
     damping = amount;
+}
+
+void ReverbFeedback::Reset()
+{
+    delay_1.Reset();
+    delay_2.Reset();
+    delay_3.Reset();
+    delay_4.Reset();
+    delay_5.Reset();
+    delay_6.Reset();
+    delay_7.Reset();
+    delay_8.Reset();
+    for (int i = 0; i < 8; i++)
+    {
+        lfo_phase[i] = 0.0f;
+        filter[i] = 0.0f;
+    }
 }

@@ -27,6 +27,8 @@ class ReverbFeedback
 
     void setDamping(float amount);
 
+    void Reset();
+
   private:
     // sampling_frq: The sample rate
     // feedback: amount of reverb that feeds back into signal 0-1

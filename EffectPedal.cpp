@@ -1,4 +1,4 @@
-#include "DSP/AllPass.h"
+#include "DSP/StateVariableFilter.h"
 #include "Effects/Chorus.h"
 #include "Effects/Distortion.h"
 #include "Effects/Reverb.h"
@@ -18,6 +18,7 @@ Switch switch2;
 CustomEffects::Distortion distortion;
 CustomEffects::Chorus chorus;
 CustomEffects::Reverb reverb;
+CustomDSP::StateVariableFilter svf;
 
 bool stopAudio = true;
 
@@ -211,6 +212,21 @@ void ApplyEffect(AudioHandle::InputBuffer &in, AudioHandle::OutputBuffer &out, s
         break;
     }
 
+    case Effect::Filter:
+    {
+        float x2 = pot1_value * pot1_value;
+        float x4 = x2 * x2;
+
+        float cutoff = 40.0f + x4 * 17960.0f;
+        svf.SetCutoff(cutoff);
+
+        float resonance_shape = pot2_value * pot2_value;
+        float q = 0.5f + resonance_shape * 9.5f;
+        svf.SetResonance(q);
+
+        svf.SetMode(CustomDSP::FilterMode::HighPass);
+    }
+
     default:
         break;
     }
@@ -236,6 +252,13 @@ void ApplyEffect(AudioHandle::InputBuffer &in, AudioHandle::OutputBuffer &out, s
         case Effect::Reverb:
         {
             reverb.Process(in[0][i], in[1][i], out[0][i], out[1][i]);
+
+            break;
+        }
+
+        case Effect::Filter:
+        {
+            svf.Process(in[0][i], in[1][i], out[0][i], out[1][i]);
 
             break;
         }
@@ -292,6 +315,7 @@ void InitEffects()
     distortion.Init(hw.AudioSampleRate());
     chorus.Init(hw.AudioSampleRate());
     reverb.Init(hw.AudioSampleRate());
+    svf.Init(hw.AudioSampleRate());
 }
 
 int main(void)

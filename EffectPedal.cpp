@@ -166,8 +166,14 @@ void ApplyEffect(AudioHandle::InputBuffer &in, AudioHandle::OutputBuffer &out, s
 
     case Effect::Reverb:
     {
-        float feedback = 0.35f + powf(pot1_value, 2.0f) * 0.55f;
-        float damping = 0.03f + powf(pot2_value, 2.0f) * 0.37f;
+        float decay_time = 0.3f * powf(20.0f, pot1_value);
+
+        float average_delay = 0.045f;
+
+        float feedback = powf(10.0f, (-3.0f * average_delay) / decay_time);
+
+        reverb.setFeedback(feedback);
+        float damping = 0.45f - pot2_value * 0.40f;
 
         reverb.setFeedback(feedback);
         reverb.setDamping(damping);
@@ -199,8 +205,7 @@ void ApplyEffect(AudioHandle::InputBuffer &in, AudioHandle::OutputBuffer &out, s
 
         case Effect::Reverb:
         {
-            out[0][i] = reverb.Process(in[0][i]);
-            out[1][i] = reverb.Process(in[1][i]);
+            reverb.Process(in[0][i], in[1][i], out[0][i], out[1][i]);
 
             break;
         }

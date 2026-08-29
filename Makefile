@@ -2,7 +2,16 @@
 TARGET = EffectPedal
 
 # Sources
-CPP_SOURCES = EffectPedal.cpp Effects/Distortion.cpp Effects/Chorus.cpp Effects/Reverb.cpp DSP/AllPass.cpp
+CPP_SOURCES = EffectPedal.cpp \
+              Effects/Distortion.cpp \
+              Effects/Chorus.cpp \
+              Effects/Reverb.cpp \
+              DSP/MasterDiffuser.cpp \
+              DSP/ReverbFeedback.cpp \
+              DSP/Diffusers/Diffuser2.cpp \
+              DSP/Diffusers/Diffuser4.cpp \
+              DSP/Diffusers/Diffuser8.cpp \
+              DSP/Diffusers/Diffuser16.cpp
 
 # Optimization
 OPT = -O3

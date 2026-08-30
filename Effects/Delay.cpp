@@ -33,8 +33,11 @@ void Delay::Process(float inL, float inR, float &outL, float &outR)
     delayL.SetDelay(current_delay);
     delayR.SetDelay(current_delay);
 
-    delayL.Write(inL + wetL * feedback);
-    delayR.Write(inR + wetR * feedback);
+    filtered_wetL += damping * (wetL - filtered_wetL);
+    filtered_wetR += damping * (wetR - filtered_wetR);
+
+    delayL.Write(inL + filtered_wetL * feedback);
+    delayR.Write(inR + filtered_wetR * feedback);
 
     outL = inL * (1.0f - mix) + wetL * mix;
     outR = inR * (1.0f - mix) + wetR * mix;

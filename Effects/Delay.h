@@ -28,6 +28,10 @@ class Delay
     float target_delay;
     float current_delay;
 
+    float filtered_wetL, filtered_wetR = 0.0f;
+
+    float damping = .3f;
+
     daisysp::DelayLine<float, 24000> delayL;
     daisysp::DelayLine<float, 24000> delayR;
 };

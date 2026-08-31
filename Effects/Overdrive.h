@@ -2,7 +2,6 @@
 #ifndef OVERDRIVE_EFFECT
 #define OVERDRIVE_EFFECT
 
-#include <algorithm>
 #ifdef __cplusplus
 
 namespace CustomEffects

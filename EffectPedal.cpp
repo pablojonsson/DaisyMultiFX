@@ -2,6 +2,7 @@
 #include "Effects/Chorus.h"
 #include "Effects/Delay.h"
 #include "Effects/Overdrive.h"
+#include "Effects/Distortion.h"
 #include "Effects/Reverb.h"
 #include "daisy_seed.h"
 #include "daisysp.h"
@@ -16,6 +17,7 @@ RgbLed led2;
 Switch switch1;
 Switch switch2;
 
+CustomEffects::Distortion distortion;
 CustomEffects::Overdrive overdrive;
 CustomEffects::Delay delay;
 CustomEffects::Chorus chorus;
@@ -26,7 +28,8 @@ bool freeze_pots = true;
 
 enum class Effect
 {
-    Overdrive,
+    Distortion,
+    // Overdrive,
     Chorus,
     Reverb,
     Filter,
@@ -35,7 +38,7 @@ enum class Effect
     Count
 };
 
-Effect curr_effect_1 = Effect::Overdrive;
+Effect curr_effect_1 = Effect::Distortion;
 Effect curr_effect_2 = Effect::None;
 int selected_effect = 0;
 
@@ -63,7 +66,7 @@ Color GetEffectColor(Effect effect)
     Color color;
     switch (effect)
     {
-    case Effect::Overdrive:
+    case Effect::Distortion:
         color.Init(1.0f, 0.0f, 0.0f);
         break;
 
@@ -212,7 +215,7 @@ void UpdateEffectParameters(Effect curr_effect, int effect_slot)
     }
 
     switch (curr_effect)
-    {
+    
     case Effect::Overdrive:
     {
         float drive = 1.0f + pot1_value * 14.0f;
@@ -220,6 +223,15 @@ void UpdateEffectParameters(Effect curr_effect, int effect_slot)
         overdrive.setDrive(drive);
         overdrive.setVolume(pot2_value);
 
+        break;
+    }
+
+    case Effect::Distortion:
+    {
+        float drive =  2.0f + 58.0f * (pot1_value * pot2_value);
+        float tone = pot2_value;
+        distortion.SetDrive(drive);
+        distortion.SetTone(tone);
         break;
     }
 
@@ -290,7 +302,7 @@ void UpdateEffectParameters(Effect curr_effect, int effect_slot)
 
     default:
         break;
-    }
+    
 }
 
 void HandleCurrEffect(Effect curr_effect, float inL, float inR, float &outL, float &outR)
@@ -301,6 +313,13 @@ void HandleCurrEffect(Effect curr_effect, float inL, float inR, float &outL, flo
     {
         outL = overdrive.Process(inL);
         outR = overdrive.Process(inR);
+        break;
+    }
+
+    case Effect::Distortion:
+    {
+        outL = distortion.Process(inL);
+        outR = distortion.Process(inR);
         break;
     }
 
@@ -394,6 +413,7 @@ void InitControls()
 void InitEffects()
 {
     overdrive.Init(hw.AudioSampleRate());
+    distortion.Init(hw.AudioSampleRate());
     chorus.Init(hw.AudioSampleRate());
     reverb.Init(hw.AudioSampleRate());
     svf.Init(hw.AudioSampleRate());

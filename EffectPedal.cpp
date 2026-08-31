@@ -19,8 +19,8 @@ Switch switch2;
 
 CustomEffects::Distortion distortion;
 CustomEffects::Overdrive overdrive;
-CustomEffects::Delay delay;
-CustomEffects::Chorus chorus;
+DSY_SDRAM_BSS CustomEffects::Delay delay;
+DSY_SDRAM_BSS CustomEffects::Chorus chorus;
 CustomEffects::Reverb reverb;
 CustomDSP::StateVariableFilter svf;
 

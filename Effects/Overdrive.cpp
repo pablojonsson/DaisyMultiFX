@@ -1,8 +1,8 @@
-#include "Distortion.h"
+#include "Overdrive.h"
 
 using namespace CustomEffects;
 
-void Distortion::Init(float sample_rate)
+void Overdrive::Init(float sample_rate)
 {
     sampling_freq = sample_rate;
     drive = .5f;
@@ -10,7 +10,7 @@ void Distortion::Init(float sample_rate)
     tone_cutoff = 20000;
 }
 
-float Distortion::Process(float in)
+float Overdrive::Process(float in)
 {
     float x = drive * in;
 
@@ -24,12 +24,12 @@ float Distortion::Process(float in)
     return out * volume;
 }
 
-void Distortion::setDrive(float amount)
+void Overdrive::setDrive(float amount)
 {
     drive = amount;
 }
 
-void Distortion::setVolume(float amount)
+void Overdrive::setVolume(float amount)
 {
     volume = amount;
 }

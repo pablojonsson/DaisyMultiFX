@@ -1,25 +1,25 @@
 #pragma once
-#ifndef DISTORTION_EFFECT
-#define DISTORTION_EFFECT
+#ifndef OVERDRIVE_EFFECT
+#define OVERDRIVE_EFFECT
 
 #include <algorithm>
 #ifdef __cplusplus
 
 namespace CustomEffects
 {
-    class Distortion
+    class Overdrive
     {
         public:
-            Distortion() {}
-            ~Distortion() {}
+            Overdrive() {}
+            ~Overdrive() {}
 
-            // Initializes Distortion effect
+            // Initializes Overdrive effect
             void Init(float sample_rate);
 
-            // Sets the drive amount of the Distortion
+            // Sets the drive amount of the Overdrive
             void setDrive(float amount);
 
-            // Sets the final volume of the Distortion
+            // Sets the final volume of the Overdrive
             void setVolume(float amount);
             
             // Processes a given input and returns the distorted output

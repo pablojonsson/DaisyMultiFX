@@ -2,23 +2,29 @@
 
 using namespace CustomDSP;
 
-void AllPass::Init(float delay_samples, float feedback_amount)
+void AllPass::Init(float sample_rate)
 {
-    delay.Init();
-    delay.SetDelay(delay_samples);
-
-    feedback = feedback_amount;
+    last_input = 0.0f;
+    last_output = 0.0f;
+    sampling_freq = sample_rate;
 }
 
 float AllPass::Process(float in)
 {
-    float delayed = delay.Read();
+    float output = -1 * alpha * in + last_input + alpha * last_output;
+    last_output = output;
+    last_input = in;
+    return output;
+}
 
-    float out = delayed - feedback * in;
+void AllPass::Reset()
+{
+    last_input = 0.0f;
+    last_output = 0.0f;
+}
 
-    float delay_input = in + feedback * out;
-
-    delay.Write(delay_input);
-
-    return out;
+float AllPass::SetAlpha(float frequency)
+{
+    float c = tanf(PI_F * frequency / sampling_freq);
+    alpha = (c - 1) / (c + 1);
 }

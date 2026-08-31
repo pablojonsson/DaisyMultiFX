@@ -13,13 +13,19 @@ class AllPass
     AllPass(){};
     ~AllPass(){};
 
-    void Init(float delay_samples, float feedback);
+    void Init(float sample_rate);
 
     float Process(float in);
 
+    void Reset();
+
+    float SetAlpha(float frequency);
+
   private:
-    daisysp::DelayLine<float, 1024> delay;
-    float feedback;
+    float sampling_freq;
+    float last_input;
+    float last_output;
+    float alpha;
 };
 } // namespace CustomDSP
 

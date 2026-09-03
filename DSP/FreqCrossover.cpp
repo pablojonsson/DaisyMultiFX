@@ -15,6 +15,7 @@ void FreqCrossover::Init(float sample_rate, float crossover_freq)
     lowR2.SetLowPass(sample_rate, crossover_freq, BUTTERWORTH_Q);
     highR1.SetHighPass(sample_rate, crossover_freq, BUTTERWORTH_Q);
     highR2.SetHighPass(sample_rate, crossover_freq, BUTTERWORTH_Q);
+    crossover_frequency = crossover_freq;
 }
 
 void FreqCrossover::Process(float inL, float inR, float &low_outL, float &high_outL, float &low_outR, float &high_outR)
@@ -24,4 +25,23 @@ void FreqCrossover::Process(float inL, float inR, float &low_outL, float &high_o
 
     low_outR = lowR2.Process(lowR1.Process(inR));
     high_outR = highR2.Process(highR1.Process(inR));
+}
+
+void FreqCrossover::SetCrossoverFreq(float freq)
+{
+    crossover_frequency = freq;
+
+    constexpr float Q = 0.70710678f;
+
+    lowL1.SetLowPass(sampling_freq, freq, Q);
+    lowL2.SetLowPass(sampling_freq, freq, Q);
+
+    highL1.SetHighPass(sampling_freq, freq, Q);
+    highL2.SetHighPass(sampling_freq, freq, Q);
+
+    lowR1.SetLowPass(sampling_freq, freq, Q);
+    lowR2.SetLowPass(sampling_freq, freq, Q);
+
+    highR1.SetHighPass(sampling_freq, freq, Q);
+    highR2.SetHighPass(sampling_freq, freq, Q);
 }

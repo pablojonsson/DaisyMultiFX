@@ -1,4 +1,5 @@
 #include "DSP/StateVariableFilter.h"
+#include "DSP/FreqCrossover.h"
 #include "Effects/Chorus.h"
 #include "Effects/Delay.h"
 #include "Effects/Distortion.h"
@@ -26,6 +27,7 @@ CustomEffects::Chorus chorus;
 CustomEffects::Reverb reverb;
 CustomEffects::Phaser phaser;
 CustomDSP::StateVariableFilter svf;
+CustomDSP::FreqCrossover crossover;
 
 void ResetEffect(Effect effect)
 {
@@ -246,8 +248,13 @@ void HandleCurrEffect(Effect curr_effect,
         case Effect::None:
         default:
         {
-            outL = inL;
-            outR = inR;
+            float low_outL, low_outR, high_outL, high_outR;
+            crossover.Process(inL, inR, low_outL, high_outL, low_outR, high_outR);
+
+            outL = low_outL + high_outL;
+            outR = low_outR + high_outR;
+            // outL = inL;
+            // outR = inR;
             break;
         }
     }
@@ -326,6 +333,7 @@ void InitEffects()
     svf.Init(sample_rate);
     delay.Init(sample_rate);
     phaser.Init(sample_rate);
+    crossover.Init(sample_rate, 1000.0f);
 }
 
 

@@ -28,6 +28,8 @@ class FreqCrossover
     Biquad highR1;
     Biquad highR2;
 
+    float crossover_frequency;
+
     float sampling_freq;
 };
 }

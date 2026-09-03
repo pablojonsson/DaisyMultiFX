@@ -27,7 +27,9 @@ namespace CustomEffects
         float sampling_freq;
         float dynamic_gain;
 
-        CustomDSP::StateVariableFilter svf;
+        CustomDSP::StateVariableFilter input_hpf;
+        CustomDSP::StateVariableFilter tone_lpf;
+        CustomDSP::StateVariableFilter tone_hpf;
 
     };
 }

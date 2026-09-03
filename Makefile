@@ -30,6 +30,6 @@ SYSTEM_FILES_DIR = $(LIBDAISY_DIR)/core
 include $(SYSTEM_FILES_DIR)/Makefile
 
 # Add custom flags AFTER Daisy Makefile
-CFLAGS += -flto
-CPPFLAGS += -flto
-LDFLAGS += -flto
+# CFLAGS += -flto
+# CPPFLAGS += -flto
+# LDFLAGS += -flto

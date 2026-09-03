@@ -5,46 +5,53 @@ using namespace CustomEffects;
 void Distortion::Init(float sample_rate)
 {
     sampling_freq = sample_rate;
-    svf.Init(sampling_freq);
+
+    input_hpf.Init(sample_rate);
+    input_hpf.SetMode(CustomDSP::FilterMode::HighPass);
+    input_hpf.SetCutoff(100.0f);
+
+    tone_lpf.Init(sample_rate);
+    tone_lpf.SetMode(CustomDSP::FilterMode::LowPass);
+    tone_lpf.SetCutoff(1800.0f);
+
+    tone_hpf.Init(sample_rate);
+    tone_hpf.SetMode(CustomDSP::FilterMode::HighPass);
+    tone_hpf.SetCutoff(1800.0f);
+
     drive = 0.5f;
     tone = 0.5f;
+    dynamic_gain = 1.0f;
 }
 
 float Distortion::Process(float in)
 {
-    svf.SetMode(CustomDSP::FilterMode::HighPass);
-    svf.SetCutoff(250.0f);
     float x;
-    svf.Process(in, in, x, x);
-    x *= 3.0f * drive;
-    if (x > 1.0f)
-        x = 1.0f;
-    else if (x < -1.0f)
-        x = -1.0f;
+    float dummy;
 
-    float clip1 = x - (x * x * x) / 3.0f;
+    input_hpf.Process(in, in, x, dummy);
 
-    float clip2 = clip1 * 5.0f;
-    if (clip2 > 0.7f) clip2 = 0.7f;
-    else if (clip2 < -0.7f) clip2 = -0.7f;
+    float gain = 1.0f + drive * 12.0f;
+    x *= gain;
 
-    float lpf_out;
-    svf.SetMode(CustomDSP::FilterMode::LowPass);
-    svf.SetCutoff(1000.0f);
-    svf.Process(clip2, clip2, lpf_out, lpf_out);
-    float hpf_out;
-    svf.SetMode(CustomDSP::FilterMode::HighPass);
-    svf.SetCutoff(1000.0f);
-    svf.Process(clip2, clip2, hpf_out, hpf_out);
-    float toned = (1.0f - tone) * lpf_out + tone * hpf_out;
+    float distorted = x / (1.0f + fabsf(x));
 
-    return toned * dynamic_gain * 1.2f;
+    float low;
+    float high;
+
+    tone_lpf.Process(distorted, distorted, low, dummy);
+    tone_hpf.Process(distorted, distorted, high, dummy);
+
+    float toned = low * (1.0f - tone)
+                + high * tone;
+
+    return toned * dynamic_gain;
 }
 
 void Distortion::SetDrive(float amount)
 {
     drive = amount;
-    dynamic_gain = 1.0f / sqrtf(drive); 
+
+    dynamic_gain = 1.0f / (1.0f + drive * 1.5f);
 }
 
 void Distortion::SetTone(float amount)

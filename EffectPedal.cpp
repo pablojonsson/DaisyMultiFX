@@ -19,8 +19,8 @@ Switch switch2;
 
 CustomEffects::Distortion distortion;
 CustomEffects::Overdrive overdrive;
-DSY_SDRAM_BSS CustomEffects::Delay delay;
-DSY_SDRAM_BSS CustomEffects::Chorus chorus;
+CustomEffects::Delay delay;
+CustomEffects::Chorus chorus;
 CustomEffects::Reverb reverb;
 CustomDSP::StateVariableFilter svf;
 
@@ -29,7 +29,7 @@ bool freeze_pots = true;
 enum class Effect
 {
     Distortion,
-    // Overdrive,
+    Overdrive,
     Chorus,
     Reverb,
     Filter,
@@ -83,6 +83,9 @@ Color GetEffectColor(Effect effect)
         break;
     case Effect::Delay:
         color.Init(1.0f, 0.0f, 1.0f);
+        break;
+    case Effect::Overdrive:
+        color.Init(1.0f, 1.0f, 0.0f);
         break;
     default:
         color.Init(0.0f, 0.0f, 0.0f);
@@ -215,6 +218,7 @@ void UpdateEffectParameters(Effect curr_effect, int effect_slot)
     }
 
     switch (curr_effect)
+    {
     
     case Effect::Overdrive:
     {
@@ -228,8 +232,9 @@ void UpdateEffectParameters(Effect curr_effect, int effect_slot)
 
     case Effect::Distortion:
     {
-        float drive =  2.0f + 58.0f * (pot1_value * pot2_value);
-        float tone = pot2_value;
+        float drive = 2.0f + 58.0f * (pot1_value * pot1_value);
+        float tone  = pot2_value;
+
         distortion.SetDrive(drive);
         distortion.SetTone(tone);
         break;
@@ -302,6 +307,7 @@ void UpdateEffectParameters(Effect curr_effect, int effect_slot)
 
     default:
         break;
+}
     
 }
 

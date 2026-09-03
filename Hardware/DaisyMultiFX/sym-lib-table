@@ -1,0 +1,6 @@
+(sym_lib_table
+	(version 7)
+	(lib (name "CustomSymbols") (type "KiCad") (uri "${KIPRJMOD}/CustomSymbols.kicad_sym") (options "") (descr ""))
+	(lib (name "RecoveredSymbols") (type "KiCad") (uri "${KIPRJMOD}/RecoveredSymbols.kicad_sym") (options "") (descr ""))
+	(lib (name "NME0505DC") (type "KiCad") (uri "${KIPRJMOD}/NME0505DC.kicad_sym") (options "") (descr ""))
+)

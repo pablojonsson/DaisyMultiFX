@@ -1,0 +1,23 @@
+%TF.GenerationSoftware,KiCad,Pcbnew,10.0.6*%
+%TF.CreationDate,2026-09-02T19:19:22-05:00*%
+%TF.ProjectId,DaisyMultiFX,44616973-794d-4756-9c74-6946582e6b69,rev?*%
+%TF.SameCoordinates,Original*%
+%TF.FileFunction,Profile,NP*%
+%FSLAX46Y46*%
+G04 Gerber Fmt 4.6, Leading zero omitted, Abs format (unit mm)*
+G04 Created by KiCad (PCBNEW 10.0.6) date 2026-09-02 19:19:22*
+%MOMM*%
+%LPD*%
+G01*
+G04 APERTURE LIST*
+%TA.AperFunction,Profile*%
+%ADD10C,0.050000*%
+%TD*%
+G04 APERTURE END LIST*
+D10*
+X108850000Y-52000000D02*
+X202850000Y-52000000D01*
+X202850000Y-134000000D01*
+X108850000Y-134000000D01*
+X108850000Y-52000000D01*
+M02*

@@ -3,6 +3,7 @@
 #define CHORUS_EFFECT
 
 #include "daisysp.h"
+#include "daisy_seed.h"
 
 #ifdef __cplusplus
 namespace CustomEffects
@@ -25,7 +26,8 @@ class Chorus
 
     void setDepth(float amount);
 
-    void Reset();
+    void SoftReset();
+    void ClearStep();
 
   private:
     // sampling_freq: the sampling frequency of the audio processor
@@ -39,16 +41,14 @@ class Chorus
     // write_index:
     int write_index;
 
+    bool clearing = false;
+    int clear_samples_remaining = 0;
+
     float lfo_sin;
     float lfo_cos;
 
     float sin_increment;
     float cos_increment;
-
-    // Delay buffers to write and read from. Handles fractional buffer indeces and interpolates
-    // them.
-    daisysp::DelayLine<float, 9600> left_delay_buffer;
-    daisysp::DelayLine<float, 9600> right_delay_buffer;
 };
 } // namespace CustomEffects
 #endif

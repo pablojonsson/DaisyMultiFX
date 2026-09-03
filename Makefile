@@ -6,16 +6,18 @@ CPP_SOURCES = EffectPedal.cpp \
               Effects/Overdrive.cpp \
 			  Effects/Distortion.cpp \
               Effects/Chorus.cpp \
+              Effects/Phaser.cpp \
               Effects/Reverb.cpp \
               Effects/Delay.cpp \
               DSP/StateVariableFilter.cpp \
+              DSP/FreqCrossover.cpp \
+              DSP/FreqCrossover/Biquad.cpp \
               DSP/MasterDiffuser.cpp \
               DSP/ReverbFeedback.cpp \
-              DSP/Diffusers/DiffuserMath.cpp \
-              DSP/Diffusers/Diffuser2.cpp \
               DSP/Diffusers/Diffuser4.cpp \
               DSP/Diffusers/Diffuser8.cpp \
-              DSP/Diffusers/Diffuser16.cpp
+              DSP/Diffusers/Diffuser16.cpp \
+              Controls/PedalControls.cpp \
 
 # Optimization
 OPT = -Os

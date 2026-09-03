@@ -12,6 +12,7 @@ void Diffuser4::Init(float sample_rate)
     delay_6.Init();
     delay_7.Init();
     delay_8.Init();
+    
     delay_1.SetDelay(73.0f);
     delay_2.SetDelay(89.0f);
     delay_3.SetDelay(107.0f);
@@ -49,14 +50,38 @@ void Diffuser4::Process(float inL, float inR, float &outL, float &outR)
     delay_8.Write(write[7]);
 }
 
-void Diffuser4::Reset()
+void Diffuser4::SoftReset()
 {
-    delay_1.Reset();
-    delay_2.Reset();
-    delay_3.Reset();
-    delay_4.Reset();
-    delay_5.Reset();
-    delay_6.Reset();
-    delay_7.Reset();
-    delay_8.Reset();
+    clearing = true;
+    clear_samples_remaining = 197;
+}
+
+void Diffuser4::ClearStep()
+{
+    if(!clearing)
+        return;
+
+    constexpr int CLEAR_PER_CALL = 8;
+
+    int amount = CLEAR_PER_CALL;
+
+    if(clear_samples_remaining < amount)
+        amount = clear_samples_remaining;
+
+    for(int i = 0; i < amount; i++)
+    {
+        delay_1.Write(0.0f);
+        delay_2.Write(0.0f);
+        delay_3.Write(0.0f);
+        delay_4.Write(0.0f);
+        delay_5.Write(0.0f);
+        delay_6.Write(0.0f);
+        delay_7.Write(0.0f);
+        delay_8.Write(0.0f);
+    }
+
+    clear_samples_remaining -= amount;
+
+    if(clear_samples_remaining <= 0)
+        clearing = false;
 }

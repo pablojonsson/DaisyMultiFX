@@ -34,6 +34,8 @@ void Reverb::setDamping(float amount)
 void Reverb::setFeedback(float amount)
 {
     feedback = amount;
+    if(feedback > 0.92f)
+        feedback = 0.92f;
     reverb_feedback.setFeedback(feedback);
 }
 
@@ -42,8 +44,14 @@ void Reverb::setMix(float amount)
     mix = amount;
 }
 
-void Reverb::Reset()
+void Reverb::SoftReset()
 {
-    diffuser.Reset();
-    reverb_feedback.Reset();
+    diffuser.SoftReset();
+    reverb_feedback.SoftReset();
+}
+
+void Reverb::ClearStep()
+{
+    diffuser.ClearStep();
+    reverb_feedback.ClearStep();
 }

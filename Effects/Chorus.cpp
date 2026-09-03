@@ -5,6 +5,12 @@ using namespace CustomEffects;
 
 constexpr float TWO_PI_F = 6.28318530717958647692f;
 
+namespace
+{
+    DSY_SDRAM_BSS daisysp::DelayLine<float, 1000> left_delay_buffer;
+    DSY_SDRAM_BSS daisysp::DelayLine<float, 1000> right_delay_buffer;
+}
+
 void Chorus::Init(float sample_rate)
 {
     sampling_freq = sample_rate;
@@ -65,10 +71,22 @@ void Chorus::setRate(float freq)
     rate = freq;
 }
 
-void Chorus::Reset()
+void Chorus::SoftReset()
 {
-    left_delay_buffer.Reset();
-    right_delay_buffer.Reset();
-    lfo_cos = 1.0f;
-    lfo_sin = 0.0f;
+    clearing = true;
+    clear_samples_remaining = 700;
+}
+
+void Chorus::ClearStep()
+{
+    if(!clearing)
+        return;
+
+    constexpr int CLEAR_PER_CALL = 8;
+
+    int amount = CLEAR_PER_CALL;
+
+    if(clear_samples_remaining < amount)
+        amount = clear_samples_remaining;
+
 }

@@ -29,7 +29,9 @@ class Reverb
 
     void setDamping(float amount);
 
-    void Reset();
+    void SoftReset();
+
+    void ClearStep();
 
   private:
     // sampling_frq: The sample rate

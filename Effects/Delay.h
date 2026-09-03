@@ -3,6 +3,7 @@
 #define DELAY_EFFECT
 
 #include "daisysp.h"
+#include "daisy_seed.h"
 
 #ifdef __cplusplus
 namespace CustomEffects
@@ -17,9 +18,13 @@ class Delay
     void SetFeedback(float feedback);
     void SetMix(float mix);
 
-    void Reset();
+    void SoftReset();
+    void ClearStep();
 
   private:
+    bool clearing = false;
+    int clear_samples_remaining = 0;
+
     float sampling_freq;
     float target_feedback;
     float feedback;
@@ -32,8 +37,8 @@ class Delay
 
     float damping = .3f;
 
-    daisysp::DelayLine<float, 24000> delayL;
-    daisysp::DelayLine<float, 24000> delayR;
+    // daisysp::DelayLine<float, 24000> delayL;
+    // daisysp::DelayLine<float, 24000> delayR;
 };
 } // namespace CustomEffects
 #endif

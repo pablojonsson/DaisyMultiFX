@@ -18,11 +18,16 @@ class Diffuser4
 
     void Process(float inL, float inR, float &outL, float &outR);
 
-    void Reset();
+    void SoftReset();
+    void ClearStep();
 
   private:
+    bool clearing = false;
+    int clear_samples_remaining = 0;
+
     float sampling_freq;
     float feedback = 0.5f;
+    
     daisysp::DelayLine<float, 74> delay_1;
     daisysp::DelayLine<float, 90> delay_2;
     daisysp::DelayLine<float, 108> delay_3;

@@ -3,7 +3,6 @@
 #define MASTER_DIFFUSER_DSP
 
 #include "../DSP/Diffusers/Diffuser16.h"
-#include "../DSP/Diffusers/Diffuser2.h"
 #include "../DSP/Diffusers/Diffuser4.h"
 #include "../DSP/Diffusers/Diffuser8.h"
 
@@ -20,11 +19,12 @@ class MasterDiffuser
 
     void Process(float inL, float inR, float &outL, float &outR);
 
-    void Reset();
+    void SoftReset();
+
+    void ClearStep();
 
   private:
     float sampling_freq;
-    Diffuser2 diff2;
     Diffuser4 diff4;
     Diffuser8 diff8;
     Diffuser16 diff16;

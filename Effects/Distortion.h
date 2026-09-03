@@ -25,7 +25,6 @@ namespace CustomEffects
         float drive;
         float tone;
         float sampling_freq;
-        float dynamic_gain;
 
         CustomDSP::StateVariableFilter input_hpf;
         CustomDSP::StateVariableFilter tone_lpf;

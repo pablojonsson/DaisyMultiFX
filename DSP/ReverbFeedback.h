@@ -27,13 +27,23 @@ class ReverbFeedback
 
     void setDamping(float amount);
 
-    void Reset();
+    void HardReset();
+    
+    void SoftReset();
+
+    void ClearStep();
 
   private:
     // sampling_frq: The sample rate
     // feedback: amount of reverb that feeds back into signal 0-1
     // damping: how fast the signal dies out 0-1
     float sampling_freq, feedback, damping;
+
+    static constexpr int MOD_UPDATE_DIV = 16;
+    int mod_counter = 0;
+
+    bool clearing = false;
+    int clear_samples_remaining = 0;
 
     float rate;  // Hz
     float depth; // samples

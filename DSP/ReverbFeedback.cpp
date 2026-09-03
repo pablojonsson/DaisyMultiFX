@@ -40,29 +40,39 @@ void ReverbFeedback::Init(float sample_rate)
 
 void ReverbFeedback::Process(float inL, float inR, float &outL, float &outR)
 {
-
-    float mod[8];
-
-    for (int i = 0; i < 8; i++)
+    if(mod_counter == 0)
     {
-        lfo_phase[i] += phase_increment[i];
-
-        if (lfo_phase[i] >= TWO_PI_F)
+        for(int i = 0; i < 8; i++)
         {
-            lfo_phase[i] -= TWO_PI_F;
+            lfo_phase[i] += phase_increment[i] * MOD_UPDATE_DIV;
+
+            if(lfo_phase[i] >= TWO_PI_F)
+                lfo_phase[i] -= TWO_PI_F;
         }
 
-        mod[i] = sinf(lfo_phase[i]) * depth;
+        float mod1 = sinf(lfo_phase[0]) * depth;
+        float mod2 = sinf(lfo_phase[1]) * depth;
+        float mod3 = sinf(lfo_phase[2]) * depth;
+        float mod4 = sinf(lfo_phase[3]) * depth;
+        float mod5 = sinf(lfo_phase[4]) * depth;
+        float mod6 = sinf(lfo_phase[5]) * depth;
+        float mod7 = sinf(lfo_phase[6]) * depth;
+        float mod8 = sinf(lfo_phase[7]) * depth;
+
+        delay_1.SetDelay(1427.0f + mod1);
+        delay_2.SetDelay(1601.0f + mod2);
+        delay_3.SetDelay(1879.0f + mod3);
+        delay_4.SetDelay(2111.0f + mod4);
+        delay_5.SetDelay(2347.0f + mod5);
+        delay_6.SetDelay(2539.0f + mod6);
+        delay_7.SetDelay(2753.0f + mod7);
+        delay_8.SetDelay(2953.0f + mod8);
     }
 
-    delay_1.SetDelay(1427.0f + mod[0]);
-    delay_2.SetDelay(1601.0f + mod[1]);
-    delay_3.SetDelay(1879.0f + mod[2]);
-    delay_4.SetDelay(2111.0f + mod[3]);
-    delay_5.SetDelay(2347.0f + mod[4]);
-    delay_6.SetDelay(2539.0f + mod[5]);
-    delay_7.SetDelay(2753.0f + mod[6]);
-    delay_8.SetDelay(2953.0f + mod[7]);
+    mod_counter++;
+
+    if(mod_counter >= MOD_UPDATE_DIV)
+        mod_counter = 0;
 
     float d1 = delay_1.Read();
     float d2 = delay_2.Read();
@@ -77,7 +87,7 @@ void ReverbFeedback::Process(float inL, float inR, float &outL, float &outR)
 
     DiffuserMath::Hadamard(fb);
 
-    for (int i = 0; i < 8; i++)
+    for(int i = 0; i < 8; i++)
     {
         filter[i] += damping * (fb[i] - filter[i]);
     }
@@ -92,7 +102,6 @@ void ReverbFeedback::Process(float inL, float inR, float &outL, float &outR)
     delay_8.Write(filter[7] * feedback + inR * 0.8f);
 
     outL = (d1 + d2 - d3 + d4 - d5 + d6 + d7 - d8) * 0.353553f;
-
     outR = (-d1 + d2 + d3 - d4 + d5 + d6 - d7 + d8) * 0.353553f;
 }
 
@@ -106,7 +115,52 @@ void ReverbFeedback::setDamping(float amount)
     damping = amount;
 }
 
-void ReverbFeedback::Reset()
+void ReverbFeedback::SoftReset()
+{
+    for(int i = 0; i < 8; i++)
+    {
+        lfo_phase[i] = 0.0f;
+        filter[i] = 0.0f;
+    }
+
+    mod_counter = 0;
+
+    clearing = true;
+    clear_samples_remaining = 3000;
+}
+
+void ReverbFeedback::ClearStep()
+{
+    if(!clearing)
+        return;
+
+    constexpr int CLEAR_PER_CALL = 8;
+
+    int amount = CLEAR_PER_CALL;
+
+    if(clear_samples_remaining < amount)
+        amount = clear_samples_remaining;
+
+    for(int i = 0; i < amount; i++)
+    {
+        delay_1.Write(0.0f);
+        delay_2.Write(0.0f);
+        delay_3.Write(0.0f);
+        delay_4.Write(0.0f);
+        delay_5.Write(0.0f);
+        delay_6.Write(0.0f);
+        delay_7.Write(0.0f);
+        delay_8.Write(0.0f);
+    }
+
+    clear_samples_remaining -= amount;
+
+    if(clear_samples_remaining <= 0)
+        clearing = false;
+}
+
+
+void ReverbFeedback::HardReset()
 {
     delay_1.Reset();
     delay_2.Reset();
@@ -116,9 +170,6 @@ void ReverbFeedback::Reset()
     delay_6.Reset();
     delay_7.Reset();
     delay_8.Reset();
-    for (int i = 0; i < 8; i++)
-    {
-        lfo_phase[i] = 0.0f;
-        filter[i] = 0.0f;
-    }
+
+    SoftReset();
 }

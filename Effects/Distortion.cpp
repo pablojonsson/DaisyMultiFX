@@ -20,7 +20,6 @@ void Distortion::Init(float sample_rate)
 
     drive = 0.5f;
     tone = 0.5f;
-    dynamic_gain = 1.0f;
 }
 
 float Distortion::Process(float in)
@@ -30,31 +29,28 @@ float Distortion::Process(float in)
 
     input_hpf.Process(in, in, x, dummy);
 
-    float gain = 1.0f + drive * 12.0f;
-    x *= gain;
+    x *= drive;
 
     float distorted = x / (1.0f + fabsf(x));
 
-    float low;
-    float high;
-
-    tone_lpf.Process(distorted, distorted, low, dummy);
-    tone_hpf.Process(distorted, distorted, high, dummy);
-
-    float toned = low * (1.0f - tone)
-                + high * tone;
-
-    return toned * dynamic_gain;
+    float toned;
+    tone_lpf.Process(distorted, distorted, toned, dummy);
+    
+    return toned * 0.7f;;
 }
 
 void Distortion::SetDrive(float amount)
 {
     drive = amount;
-
-    dynamic_gain = 1.0f / (1.0f + drive * 1.5f);
 }
 
 void Distortion::SetTone(float amount)
 {
     tone = amount;
+
+    float shaped = tone * tone;
+
+    float cutoff = 1800.0f + shaped * 6200.0f;
+
+    tone_lpf.SetCutoff(cutoff);
 }

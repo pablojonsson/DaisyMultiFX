@@ -2,6 +2,12 @@
 
 using namespace CustomEffects;
 
+namespace
+{
+    DSY_SDRAM_BSS daisysp::DelayLine<float, 24000> delayL;
+    DSY_SDRAM_BSS daisysp::DelayLine<float, 24000> delayR;
+}
+
 void Delay::Init(float sample_rate)
 {
     sampling_freq = sample_rate;
@@ -58,8 +64,32 @@ void Delay::SetMix(float amount)
     mix = amount;
 }
 
-void Delay::Reset()
+void Delay::SoftReset()
 {
-    delayL.Reset();
-    delayR.Reset();
+    clearing = true;
+    clear_samples_remaining = 24000;
+}
+
+void Delay::ClearStep()
+{
+    if(!clearing)
+        return;
+
+    constexpr int CLEAR_PER_CALL = 16;
+
+    int amount = CLEAR_PER_CALL;
+
+    if(clear_samples_remaining < amount)
+        amount = clear_samples_remaining;
+
+    for(int i = 0; i < amount; i++)
+    {
+        delayL.Write(0.0f);
+        delayR.Write(0.0f);
+    }
+
+    clear_samples_remaining -= amount;
+
+    if(clear_samples_remaining <= 0)
+        clearing = false;
 }

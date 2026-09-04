@@ -2,21 +2,15 @@
 #ifndef CHORUS_EFFECT
 #define CHORUS_EFFECT
 
-#include "daisysp.h"
 #include "daisy_seed.h"
+#include "daisysp.h"
 
 #ifdef __cplusplus
-namespace CustomEffects
-{
-class Chorus
-{
+namespace CustomEffects {
+class Chorus {
   public:
-    Chorus()
-    {
-    }
-    ~Chorus()
-    {
-    }
+    Chorus() {}
+    ~Chorus() {}
 
     void Init(float sample_rate);
 

@@ -4,33 +4,28 @@
 
 #include "daisysp.h"
 
-namespace CustomEffects
-{
+namespace CustomEffects {
 
-struct AllPassStage
-{
-    float previous_input  = 0.0f;
+struct AllPassStage {
+    float previous_input = 0.0f;
     float previous_output = 0.0f;
 
-    float Process(float in, float a)
-    {
+    float Process(float in, float a) {
         float out = -a * in + previous_input + a * previous_output;
 
-        previous_input  = in;
+        previous_input = in;
         previous_output = out;
 
         return out;
     }
 
-    void Reset()
-    {
-        previous_input  = 0.0f;
+    void Reset() {
+        previous_input = 0.0f;
         previous_output = 0.0f;
     }
 };
 
-class Phaser
-{
+class Phaser {
   public:
     void Init(float sample_rate);
 
@@ -62,7 +57,7 @@ class Phaser
 
     float sampling_freq;
 
-    float lfo_phase       = 0.0f;
+    float lfo_phase = 0.0f;
     float phase_increment = 0.0f;
 
     float rate;

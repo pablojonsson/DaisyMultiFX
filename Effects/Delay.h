@@ -2,14 +2,12 @@
 #ifndef DELAY_EFFECT
 #define DELAY_EFFECT
 
-#include "daisysp.h"
 #include "daisy_seed.h"
+#include "daisysp.h"
 
 #ifdef __cplusplus
-namespace CustomEffects
-{
-class Delay
-{
+namespace CustomEffects {
+class Delay {
   public:
     void Init(float sample_rate);
     void Process(float inL, float inR, float &outL, float &outR);

@@ -2,14 +2,11 @@
 #ifndef DIFFUSER_MATH_H
 #define DIFFUSER_MATH_H
 
-namespace CustomDSP
-{
+namespace CustomDSP {
 
-class DiffuserMath
-{
+class DiffuserMath {
   public:
-    static inline void Hadamard(float x[8])
-    {
+    static inline void Hadamard(float x[8]) {
         float a0 = x[0] + x[1];
         float a1 = x[0] - x[1];
         float a2 = x[2] + x[3];
@@ -40,14 +37,8 @@ class DiffuserMath
         x[7] = (b3 - b7) * norm;
     }
 
-    static inline void Process(float inL,
-                               float inR,
-                               float feedback,
-                               const float delayed[8],
-                               float writes[8],
-                               float &outL,
-                               float &outR)
-    {
+    static inline void Process(float inL, float inR, float feedback, const float delayed[8],
+                               float writes[8], float &outL, float &outR) {
         writes[0] = delayed[0];
         writes[1] = delayed[1];
         writes[2] = delayed[2];
@@ -70,27 +61,13 @@ class DiffuserMath
 
         constexpr float norm = 0.353553f;
 
-        float wetL =
-            (delayed[0]
-             + delayed[1]
-             - delayed[2]
-             + delayed[3]
-             - delayed[4]
-             + delayed[5]
-             + delayed[6]
-             - delayed[7])
-            * norm;
+        float wetL = (delayed[0] + delayed[1] - delayed[2] + delayed[3] - delayed[4] + delayed[5] +
+                      delayed[6] - delayed[7]) *
+                     norm;
 
-        float wetR =
-            (-delayed[0]
-             + delayed[1]
-             + delayed[2]
-             - delayed[3]
-             + delayed[4]
-             + delayed[5]
-             - delayed[6]
-             + delayed[7])
-            * norm;
+        float wetR = (-delayed[0] + delayed[1] + delayed[2] - delayed[3] + delayed[4] + delayed[5] -
+                      delayed[6] + delayed[7]) *
+                     norm;
 
         outL = inL * 0.7f + wetL * 0.3f;
         outR = inR * 0.7f + wetR * 0.3f;

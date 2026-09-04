@@ -2,8 +2,7 @@
 
 using namespace CustomDSP;
 
-void FreqCrossover::Init(float sample_rate, float crossover_freq)
-{
+void FreqCrossover::Init(float sample_rate, float crossover_freq) {
     sampling_freq = sample_rate;
     constexpr float BUTTERWORTH_Q = 0.70710678f;
     lowL1.SetLowPass(sample_rate, crossover_freq, BUTTERWORTH_Q);
@@ -18,8 +17,8 @@ void FreqCrossover::Init(float sample_rate, float crossover_freq)
     crossover_frequency = crossover_freq;
 }
 
-void FreqCrossover::Process(float inL, float inR, float &low_outL, float &high_outL, float &low_outR, float &high_outR)
-{
+void FreqCrossover::Process(float inL, float inR, float &low_outL, float &high_outL,
+                            float &low_outR, float &high_outR) {
     low_outL = lowL2.Process(lowL1.Process(inL));
     high_outL = highL2.Process(highL1.Process(inL));
 
@@ -27,8 +26,7 @@ void FreqCrossover::Process(float inL, float inR, float &low_outL, float &high_o
     high_outR = highR2.Process(highR1.Process(inR));
 }
 
-void FreqCrossover::SetCrossoverFreq(float freq)
-{
+void FreqCrossover::SetCrossoverFreq(float freq) {
     crossover_frequency = freq;
 
     constexpr float Q = 0.70710678f;

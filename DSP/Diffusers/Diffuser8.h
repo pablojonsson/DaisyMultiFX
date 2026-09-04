@@ -6,10 +6,8 @@
 #include "daisysp.h"
 
 #ifdef __cplusplus
-namespace CustomDSP
-{
-class Diffuser8
-{
+namespace CustomDSP {
+class Diffuser8 {
   public:
     Diffuser8(){};
     ~Diffuser8(){};

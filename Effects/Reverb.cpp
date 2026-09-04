@@ -2,8 +2,7 @@
 
 using namespace CustomEffects;
 
-void Reverb::Init(float sample_rate)
-{
+void Reverb::Init(float sample_rate) {
     sampling_freq = sample_rate;
     mix = .7f;
     damping = .2f;
@@ -14,8 +13,7 @@ void Reverb::Init(float sample_rate)
     reverb_feedback.setFeedback(feedback);
 }
 
-void Reverb::Process(float inL, float inR, float &outL, float &outR)
-{
+void Reverb::Process(float inL, float inR, float &outL, float &outR) {
     float diffL, diffR;
     float wetL, wetR;
 
@@ -25,33 +23,26 @@ void Reverb::Process(float inL, float inR, float &outL, float &outR)
     outR = inR + wetR * mix;
 }
 
-void Reverb::setDamping(float amount)
-{
+void Reverb::setDamping(float amount) {
     damping = amount;
     reverb_feedback.setDamping(damping);
 }
 
-void Reverb::setFeedback(float amount)
-{
+void Reverb::setFeedback(float amount) {
     feedback = amount;
-    if(feedback > 0.92f)
+    if (feedback > 0.92f)
         feedback = 0.92f;
     reverb_feedback.setFeedback(feedback);
 }
 
-void Reverb::setMix(float amount)
-{
-    mix = amount;
-}
+void Reverb::setMix(float amount) { mix = amount; }
 
-void Reverb::SoftReset()
-{
+void Reverb::SoftReset() {
     diffuser.SoftReset();
     reverb_feedback.SoftReset();
 }
 
-void Reverb::ClearStep()
-{
+void Reverb::ClearStep() {
     diffuser.ClearStep();
     reverb_feedback.ClearStep();
 }

@@ -3,33 +3,36 @@
 
 using namespace daisy;
 
-void PedalControls::Init(DaisySeed &seed)
-{
+void PedalControls::Init(DaisySeed &seed) {
     hw = &seed;
-
-    freeze_pots = true;
 
     selected_slot = 0;
 
-    curr_effect_1 = Effect::Distortion;
-    curr_effect_2 = Effect::None;
+    encoder_save_triggered = false;
+    save_led_flash = false;
 
-    pot1_value_1 = 0.0f;
-    pot2_value_1 = 0.0f;
+    hw->SetLed(false);
 
-    pot1_value_2 = 0.0f;
-    pot2_value_2 = 0.0f;
+    for (int i = 0; i < NUM_EFFECT_SLOTS; ++i) {
+        curr_effect[i] = Effect::None;
 
-    reset_pending_1 = false;
-    reset_pending_2 = false;
+        pot1_value[i] = 0.0f;
+        pot2_value[i] = 0.0f;
 
-    reset_effect_1 = Effect::None;
-    reset_effect_2 = Effect::None;
+        saved_pot1_value[i] = 0.0f;
+        saved_pot2_value[i] = 0.0f;
 
-    encoder.Init(
-        hw->GetPin(26),
-        hw->GetPin(25),
-        hw->GetPin(13));
+        pot1_changed[i] = false;
+        pot2_changed[i] = false;
+
+        pot1_picked_up[i] = false;
+        pot2_picked_up[i] = false;
+
+        reset_pending[i] = false;
+        reset_effect[i] = Effect::None;
+    }
+
+    encoder.Init(hw->GetPin(26), hw->GetPin(25), hw->GetPin(13));
 
     AdcChannelConfig pot1_config;
     pot1_config.InitSingle(hw->GetPin(21));
@@ -37,134 +40,58 @@ void PedalControls::Init(DaisySeed &seed)
     AdcChannelConfig pot2_config;
     pot2_config.InitSingle(hw->GetPin(15));
 
-    AdcChannelConfig pot_configs[] =
-    {
-        pot1_config,
-        pot2_config
-    };
+    AdcChannelConfig pot_configs[] = {pot1_config, pot2_config};
 
     hw->adc.Init(pot_configs, 2);
     hw->adc.Start();
 
-    led1.Init(
-        hw->GetPin(20),
-        hw->GetPin(19),
-        hw->GetPin(18),
-        true);
+    led1.Init(hw->GetPin(20), hw->GetPin(19), hw->GetPin(18), true);
 
-    led2.Init(
-        hw->GetPin(17),
-        hw->GetPin(24),
-        hw->GetPin(23),
-        true);
+    led2.Init(hw->GetPin(17), hw->GetPin(24), hw->GetPin(23), true);
 
     switch1.Init(hw->GetPin(27));
     switch2.Init(hw->GetPin(28));
 
-    led1.SetColor(GetEffectColor(curr_effect_1));
+    led1.SetColor(GetEffectColor(curr_effect[0]));
     led1.Update();
 
-    led2.SetColor(GetEffectColor(curr_effect_2));
+    led2.SetColor(GetEffectColor(curr_effect[1]));
     led2.Update();
-
-    hw->SetLed(freeze_pots);
 }
 
-void PedalControls::Update()
-{
+void PedalControls::Update() {
     HandleEncoder();
     HandleSwitches();
     UpdatePots();
     UpdateLeds();
+    UpdateSaveLed();
 }
 
-void PedalControls::HandleEncoder()
-{
-    encoder.Debounce();
+void PedalControls::UpdateLeds() {
+    int first_slot = GetCurrentPage() * 2;
+    int second_slot = first_slot + 1;
 
-    if(encoder.RisingEdge())
-    {
-        freeze_pots = !freeze_pots;
-        hw->SetLed(freeze_pots);
+    Color color_1 = GetEffectColor(curr_effect[first_slot]);
+    Color color_2 = GetEffectColor(curr_effect[second_slot]);
+
+    if (curr_effect[first_slot] == Effect::None) {
+        if (selected_slot == first_slot)
+            color_1.Init(0.15f, 0.15f, 0.15f);
+        else
+            color_1.Init(0.0f, 0.0f, 0.0f);
     }
 
-    int new_index =
-        selected_slot + encoder.Increment();
-
-    int num_slots = 2;
-
-    new_index =
-        ((new_index % num_slots) + num_slots)
-        % num_slots;
-
-    selected_slot = new_index;
-}
-
-void PedalControls::HandleSwitches()
-{
-    switch1.Debounce();
-    switch2.Debounce();
-
-    if(switch1.RisingEdge())
-    {
-        Effect old = curr_effect_1;
-
-        curr_effect_1 =
-            NextEffect(
-                curr_effect_1,
-                curr_effect_2);
-
-        if(old != curr_effect_1)
-        {
-            reset_effect_1 = old;
-            reset_pending_1 = true;
-
-            pot1_changed_1 = true;
-            pot2_changed_1 = true;
-        }
+    if (curr_effect[second_slot] == Effect::None) {
+        if (selected_slot == second_slot)
+            color_2.Init(0.15f, 0.15f, 0.15f);
+        else
+            color_2.Init(0.0f, 0.0f, 0.0f);
     }
 
-    if(switch2.RisingEdge())
-    {
-        Effect old = curr_effect_2;
-
-        curr_effect_2 =
-            NextEffect(
-                curr_effect_2,
-                curr_effect_1);
-
-        if(old != curr_effect_2)
-        {
-            reset_effect_2 = old;
-            reset_pending_2 = true;
-
-            pot1_changed_2 = true;
-            pot2_changed_2 = true;
-        }
-    }
-}
-
-void PedalControls::UpdateLeds()
-{
-    Color color_1 =
-        GetEffectColor(curr_effect_1);
-
-    Color color_2 =
-        GetEffectColor(curr_effect_2);
-
-    if(selected_slot == 0)
-    {
-        color_2.Init(
-            color_2.Red() * 0.5f,
-            color_2.Green() * 0.5f,
-            color_2.Blue() * 0.5f);
-    }
-    else
-    {
-        color_1.Init(
-            color_1.Red() * 0.5f,
-            color_1.Green() * 0.5f,
-            color_1.Blue() * 0.5f);
+    if (selected_slot == first_slot) {
+        color_2.Init(color_2.Red() * 0.5f, color_2.Green() * 0.5f, color_2.Blue() * 0.5f);
+    } else {
+        color_1.Init(color_1.Red() * 0.5f, color_1.Green() * 0.5f, color_1.Blue() * 0.5f);
     }
 
     led1.SetColor(color_1);
@@ -174,157 +101,227 @@ void PedalControls::UpdateLeds()
     led2.Update();
 }
 
-Effect PedalControls::NextEffect(
-    Effect current,
-    Effect other)
-{
-    int next =
-        static_cast<int>(current);
+void PedalControls::CycleSlot(int slot) {
+    Effect old = curr_effect[slot];
 
-    int count =
-        static_cast<int>(Effect::Count);
+    curr_effect[slot] = NextEffect(curr_effect[slot], slot);
 
-    do
-    {
-        next = (next + 1) % count;
+    if (old != curr_effect[slot]) {
+        reset_effect[slot] = old;
+        reset_pending[slot] = true;
+
+        pot1_changed[slot] = true;
+        pot2_changed[slot] = true;
     }
-    while(
-        static_cast<Effect>(next) == other
-        && other != Effect::None);
-
-    return static_cast<Effect>(next);
 }
 
-Color PedalControls::GetEffectColor(
-    Effect effect)
-{
+void PedalControls::ClearSlot(int slot) {
+    Effect old = curr_effect[slot];
+
+    if (old == Effect::None)
+        return;
+
+    curr_effect[slot] = Effect::None;
+
+    reset_effect[slot] = old;
+    reset_pending[slot] = true;
+}
+
+void PedalControls::HandleEncoder() {
+    encoder.Debounce();
+
+    int old_slot = selected_slot;
+
+    int increment = encoder.Increment();
+
+    if (increment != 0) {
+        selected_slot += increment;
+
+        if (selected_slot < 0)
+            selected_slot = 0;
+
+        if (selected_slot >= NUM_EFFECT_SLOTS)
+            selected_slot = NUM_EFFECT_SLOTS - 1;
+    }
+
+    if (selected_slot != old_slot) {
+        pot1_value[old_slot] = saved_pot1_value[old_slot];
+        pot2_value[old_slot] = saved_pot2_value[old_slot];
+
+        pot1_changed[old_slot] = true;
+        pot2_changed[old_slot] = true;
+
+        pot1_picked_up[selected_slot] = false;
+        pot2_picked_up[selected_slot] = false;
+    }
+
+    if (encoder.RisingEdge())
+        encoder_save_triggered = false;
+
+    if (!encoder_save_triggered && encoder.TimeHeldMs() >= SAVE_HOLD_MS) {
+        SaveCurrentSlot();
+        encoder_save_triggered = true;
+    }
+}
+
+void PedalControls::SaveCurrentSlot() {
+    saved_pot1_value[selected_slot] = pot1_value[selected_slot];
+
+    saved_pot2_value[selected_slot] = pot2_value[selected_slot];
+
+    save_led_flash = true;
+    save_led_flash_start = System::GetNow();
+
+    hw->SetLed(true);
+}
+
+void PedalControls::HandleSwitches() {
+    switch1.Debounce();
+    switch2.Debounce();
+
+    int first_slot = GetCurrentPage() * 2;
+    int second_slot = first_slot + 1;
+
+    if (switch1.RisingEdge()) {
+        switch1_slot = first_slot;
+        switch1_long_press = false;
+    }
+
+    if (!switch1_long_press && switch1.TimeHeldMs() >= LONG_PRESS_MS) {
+        ClearSlot(switch1_slot);
+        switch1_long_press = true;
+    }
+
+    if (switch1.FallingEdge()) {
+        if (!switch1_long_press)
+            CycleSlot(switch1_slot);
+    }
+
+    if (switch2.RisingEdge()) {
+        switch2_slot = second_slot;
+        switch2_long_press = false;
+    }
+
+    if (!switch2_long_press && switch2.TimeHeldMs() >= LONG_PRESS_MS) {
+        ClearSlot(switch2_slot);
+        switch2_long_press = true;
+    }
+
+    if (switch2.FallingEdge()) {
+        if (!switch2_long_press)
+            CycleSlot(switch2_slot);
+    }
+}
+void PedalControls::UpdatePots() {
+    float pot1 = hw->adc.GetFloat(0);
+    float pot2 = hw->adc.GetFloat(1);
+
+    int slot = selected_slot;
+
+    if (!pot1_picked_up[slot]) {
+        if (fabsf(pot1 - pot1_value[slot]) <= POT_PICKUP_THRESHOLD) {
+            pot1_picked_up[slot] = true;
+        }
+    } else {
+        pot1_value[slot] = UpdatePotValue(pot1_value[slot], pot1, pot1_changed[slot]);
+    }
+
+    if (!pot2_picked_up[slot]) {
+        if (fabsf(pot2 - pot2_value[slot]) <= POT_PICKUP_THRESHOLD) {
+            pot2_picked_up[slot] = true;
+        }
+    } else {
+        pot2_value[slot] = UpdatePotValue(pot2_value[slot], pot2, pot2_changed[slot]);
+    }
+}
+
+Effect PedalControls::NextEffect(Effect current, int slot) {
+    int next = static_cast<int>(current);
+    int count = static_cast<int>(Effect::Count);
+
+    while (true) {
+        next = (next + 1) % count;
+
+        Effect candidate = static_cast<Effect>(next);
+
+        if (candidate == Effect::None)
+            return candidate;
+
+        bool already_used = false;
+
+        for (int i = 0; i < NUM_EFFECT_SLOTS; i++) {
+            if (i != slot && curr_effect[i] == candidate) {
+                already_used = true;
+                break;
+            }
+        }
+
+        if (!already_used)
+            return candidate;
+    }
+}
+
+Color PedalControls::GetEffectColor(Effect effect) {
     Color color;
 
-    switch(effect)
-    {
-        case Effect::Distortion:
-            color.Init(
-                1.0f,
-                0.0f,
-                0.0f);
-            break;
+    switch (effect) {
+    case Effect::Distortion:
+        color.Init(1.0f, 0.0f, 0.0f);
+        break;
 
-        case Effect::Overdrive:
-            color.Init(
-                1.0f,
-                1.0f,
-                0.0f);
-            break;
+    case Effect::Overdrive:
+        color.Init(1.0f, 1.0f, 0.0f);
+        break;
 
-        case Effect::Chorus:
-            color.Init(
-                0.0f,
-                0.0f,
-                1.0f);
-            break;
+    case Effect::Chorus:
+        color.Init(0.0f, 0.0f, 1.0f);
+        break;
 
-        case Effect::Reverb:
-            color.Init(
-                0.0f,
-                1.0f,
-                0.0f);
-            break;
+    case Effect::Reverb:
+        color.Init(0.0f, 1.0f, 0.0f);
+        break;
 
-        case Effect::Phaser:
-            color.Init(
-                0.0f,
-                1.0f,
-                1.0f);
-            break;
+    case Effect::Phaser:
+        color.Init(0.0f, 1.0f, 1.0f);
+        break;
 
-        case Effect::Filter:
-            color.Init(
-                1.0f,
-                1.0f,
-                1.0f);
-            break;
+    case Effect::Filter:
+        color.Init(1.0f, 1.0f, 1.0f);
+        break;
 
-        case Effect::Delay:
-            color.Init(
-                1.0f,
-                0.0f,
-                1.0f);
-            break;
+    case Effect::Delay:
+        color.Init(1.0f, 0.0f, 1.0f);
+        break;
 
-        case Effect::None:
-        default:
-            color.Init(
-                0.0f,
-                0.0f,
-                0.0f);
-            break;
+    case Effect::None:
+    default:
+        color.Init(0.0f, 0.0f, 0.0f);
+        break;
     }
 
     return color;
 }
 
-Effect PedalControls::GetEffect(
-    int slot) const
-{
-    if(slot == 0)
-        return curr_effect_1;
+Effect PedalControls::GetEffect(int slot) const { return curr_effect[slot]; }
 
-    return curr_effect_2;
-}
+float PedalControls::GetPot1(int slot) const { return pot1_value[slot]; }
 
-float PedalControls::GetPot1(
-    int slot) const
-{
-    if(slot == 0)
-        return pot1_value_1;
+float PedalControls::GetPot2(int slot) const { return pot2_value[slot]; }
 
-    return pot1_value_2;
-}
+int PedalControls::GetSelectedSlot() const { return selected_slot; }
 
-float PedalControls::GetPot2(
-    int slot) const
-{
-    if(slot == 0)
-        return pot2_value_1;
-
-    return pot2_value_2;
-}
-
-int PedalControls::GetSelectedSlot() const
-{
-    return selected_slot;
-}
-
-bool PedalControls::ConsumeResetRequest(
-    int slot,
-    Effect &old_effect)
-{
-    if(slot == 0)
-    {
-        if(!reset_pending_1)
-            return false;
-
-        old_effect = reset_effect_1;
-        reset_pending_1 = false;
-
-        return true;
-    }
-
-    if(!reset_pending_2)
+bool PedalControls::ConsumeResetRequest(int slot, Effect &old_effect) {
+    if (!reset_pending[slot])
         return false;
 
-    old_effect = reset_effect_2;
-    reset_pending_2 = false;
+    old_effect = reset_effect[slot];
+    reset_pending[slot] = false;
 
     return true;
 }
 
-float PedalControls::UpdatePotValue(float current,
-                                    float new_value,
-                                    bool &changed)
-{
-    if(fabsf(new_value - current) >= POT_DEADBAND)
-    {
+float PedalControls::UpdatePotValue(float current, float new_value, bool &changed) {
+    if (fabsf(new_value - current) >= POT_DEADBAND) {
         changed = true;
         return new_value;
     }
@@ -332,68 +329,26 @@ float PedalControls::UpdatePotValue(float current,
     return current;
 }
 
-void PedalControls::UpdatePots()
-{
-    if(freeze_pots)
+bool PedalControls::Pot1Changed(int slot) {
+    bool changed = pot1_changed[slot];
+    pot1_changed[slot] = false;
+    return changed;
+}
+
+bool PedalControls::Pot2Changed(int slot) {
+    bool changed = pot2_changed[slot];
+    pot2_changed[slot] = false;
+    return changed;
+}
+
+int PedalControls::GetCurrentPage() const { return selected_slot / 2; }
+
+void PedalControls::UpdateSaveLed() {
+    if (!save_led_flash)
         return;
 
-    float pot1 = hw->adc.GetFloat(0);
-    float pot2 = hw->adc.GetFloat(1);
-
-    if(selected_slot == 0)
-    {
-        pot1_value_1 =
-            UpdatePotValue(
-                pot1_value_1,
-                pot1,
-                pot1_changed_1);
-
-        pot2_value_1 =
-            UpdatePotValue(
-                pot2_value_1,
-                pot2,
-                pot2_changed_1);
+    if (System::GetNow() - save_led_flash_start >= SAVE_FLASH_MS) {
+        hw->SetLed(false);
+        save_led_flash = false;
     }
-    else
-    {
-        pot1_value_2 =
-            UpdatePotValue(
-                pot1_value_2,
-                pot1,
-                pot1_changed_2);
-
-        pot2_value_2 =
-            UpdatePotValue(
-                pot2_value_2,
-                pot2,
-                pot2_changed_2);
-    }
-}
-
-bool PedalControls::Pot1Changed(int slot)
-{
-    if(slot == 0)
-    {
-        bool changed = pot1_changed_1;
-        pot1_changed_1 = false;
-        return changed;
-    }
-
-    bool changed = pot1_changed_2;
-    pot1_changed_2 = false;
-    return changed;
-}
-
-bool PedalControls::Pot2Changed(int slot)
-{
-    if(slot == 0)
-    {
-        bool changed = pot2_changed_1;
-        pot2_changed_1 = false;
-        return changed;
-    }
-
-    bool changed = pot2_changed_2;
-    pot2_changed_2 = false;
-    return changed;
 }

@@ -2,14 +2,12 @@
 
 using namespace CustomEffects;
 
-namespace
-{
-    DSY_SDRAM_BSS daisysp::DelayLine<float, 24000> delayL;
-    DSY_SDRAM_BSS daisysp::DelayLine<float, 24000> delayR;
-}
+namespace {
+DSY_SDRAM_BSS daisysp::DelayLine<float, 24000> delayL;
+DSY_SDRAM_BSS daisysp::DelayLine<float, 24000> delayR;
+} // namespace
 
-void Delay::Init(float sample_rate)
-{
+void Delay::Init(float sample_rate) {
     sampling_freq = sample_rate;
 
     delayL.Init();
@@ -27,8 +25,7 @@ void Delay::Init(float sample_rate)
     mix = 0.5f;
 }
 
-void Delay::Process(float inL, float inR, float &outL, float &outR)
-{
+void Delay::Process(float inL, float inR, float &outL, float &outR) {
     float wetL = delayL.Read();
     float wetR = delayR.Read();
 
@@ -49,47 +46,37 @@ void Delay::Process(float inL, float inR, float &outL, float &outR)
     outR = inR * (1.0f - mix) + wetR * mix;
 }
 
-void Delay::SetDelayTime(float time_in_ms)
-{
+void Delay::SetDelayTime(float time_in_ms) {
     target_delay = (time_in_ms / 1000.0f) * sampling_freq;
 }
 
-void Delay::SetFeedback(float amount)
-{
-    target_feedback = amount;
-}
+void Delay::SetFeedback(float amount) { target_feedback = amount; }
 
-void Delay::SetMix(float amount)
-{
-    mix = amount;
-}
+void Delay::SetMix(float amount) { mix = amount; }
 
-void Delay::SoftReset()
-{
+void Delay::SoftReset() {
     clearing = true;
     clear_samples_remaining = 24000;
 }
 
-void Delay::ClearStep()
-{
-    if(!clearing)
+void Delay::ClearStep() {
+    if (!clearing)
         return;
 
     constexpr int CLEAR_PER_CALL = 16;
 
     int amount = CLEAR_PER_CALL;
 
-    if(clear_samples_remaining < amount)
+    if (clear_samples_remaining < amount)
         amount = clear_samples_remaining;
 
-    for(int i = 0; i < amount; i++)
-    {
+    for (int i = 0; i < amount; i++) {
         delayL.Write(0.0f);
         delayR.Write(0.0f);
     }
 
     clear_samples_remaining -= amount;
 
-    if(clear_samples_remaining <= 0)
+    if (clear_samples_remaining <= 0)
         clearing = false;
 }

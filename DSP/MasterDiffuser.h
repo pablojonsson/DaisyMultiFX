@@ -7,10 +7,8 @@
 #include "../DSP/Diffusers/Diffuser8.h"
 
 #ifdef __cplusplus
-namespace CustomDSP
-{
-class MasterDiffuser
-{
+namespace CustomDSP {
+class MasterDiffuser {
   public:
     MasterDiffuser(){};
     ~MasterDiffuser(){};

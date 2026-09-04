@@ -7,17 +7,11 @@
 #include "daisysp.h"
 
 #ifdef __cplusplus
-namespace CustomEffects
-{
-class Reverb
-{
+namespace CustomEffects {
+class Reverb {
   public:
-    Reverb()
-    {
-    }
-    ~Reverb()
-    {
-    }
+    Reverb() {}
+    ~Reverb() {}
 
     void Init(float sample_rate);
 

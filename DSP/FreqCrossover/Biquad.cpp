@@ -1,8 +1,7 @@
 #include "Biquad.h"
 using namespace CustomDSP;
 
-float Biquad::Process(float in)
-{
+float Biquad::Process(float in) {
     float out = b0 * in + z1;
 
     z1 = b1 * in - a1 * out + z2;
@@ -11,10 +10,7 @@ float Biquad::Process(float in)
     return out;
 }
 
-void Biquad::SetLowPass(float sample_rate,
-                        float cutoff,
-                        float q)
-{
+void Biquad::SetLowPass(float sample_rate, float cutoff, float q) {
     float omega = 2.0f * PI_F * cutoff / sample_rate;
 
     float cos_w = cosf(omega);
@@ -32,10 +28,7 @@ void Biquad::SetLowPass(float sample_rate,
     a2 = (1.0f - alpha) / a0;
 }
 
-void Biquad::SetHighPass(float sample_rate,
-                         float cutoff,
-                         float q)
-{
+void Biquad::SetHighPass(float sample_rate, float cutoff, float q) {
     float omega = 2.0f * PI_F * cutoff / sample_rate;
 
     float cos_w = cosf(omega);

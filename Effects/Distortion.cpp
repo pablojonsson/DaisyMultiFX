@@ -2,8 +2,7 @@
 
 using namespace CustomEffects;
 
-void Distortion::Init(float sample_rate)
-{
+void Distortion::Init(float sample_rate) {
     sampling_freq = sample_rate;
 
     input_hpf.Init(sample_rate);
@@ -22,8 +21,7 @@ void Distortion::Init(float sample_rate)
     tone = 0.5f;
 }
 
-float Distortion::Process(float in)
-{
+float Distortion::Process(float in) {
     float x;
     float dummy;
 
@@ -35,17 +33,14 @@ float Distortion::Process(float in)
 
     float toned;
     tone_lpf.Process(distorted, distorted, toned, dummy);
-    
-    return toned * 0.7f;;
+
+    return toned * 0.7f;
+    ;
 }
 
-void Distortion::SetDrive(float amount)
-{
-    drive = amount;
-}
+void Distortion::SetDrive(float amount) { drive = amount; }
 
-void Distortion::SetTone(float amount)
-{
+void Distortion::SetTone(float amount) {
     tone = amount;
 
     float shaped = tone * tone;

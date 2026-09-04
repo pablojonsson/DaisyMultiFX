@@ -1,8 +1,7 @@
 #include "Diffuser8.h"
 
 using namespace CustomDSP;
-void Diffuser8::Init(float sample_rate)
-{
+void Diffuser8::Init(float sample_rate) {
     sampling_freq = sample_rate;
     delay_1.Init();
     delay_2.Init();
@@ -22,8 +21,7 @@ void Diffuser8::Init(float sample_rate)
     delay_8.SetDelay(383.0f);
 }
 
-void Diffuser8::Process(float inL, float inR, float &outL, float &outR)
-{
+void Diffuser8::Process(float inL, float inR, float &outL, float &outR) {
     float d[8];
 
     d[0] = delay_1.Read();
@@ -49,26 +47,23 @@ void Diffuser8::Process(float inL, float inR, float &outL, float &outR)
     delay_8.Write(write[7]);
 }
 
-void Diffuser8::SoftReset()
-{
+void Diffuser8::SoftReset() {
     clearing = true;
     clear_samples_remaining = 383;
 }
 
-void Diffuser8::ClearStep()
-{
-    if(!clearing)
+void Diffuser8::ClearStep() {
+    if (!clearing)
         return;
 
     constexpr int CLEAR_PER_CALL = 8;
 
     int amount = CLEAR_PER_CALL;
 
-    if(clear_samples_remaining < amount)
+    if (clear_samples_remaining < amount)
         amount = clear_samples_remaining;
 
-    for(int i = 0; i < amount; i++)
-    {
+    for (int i = 0; i < amount; i++) {
         delay_1.Write(0.0f);
         delay_2.Write(0.0f);
         delay_3.Write(0.0f);
@@ -81,6 +76,6 @@ void Diffuser8::ClearStep()
 
     clear_samples_remaining -= amount;
 
-    if(clear_samples_remaining <= 0)
+    if (clear_samples_remaining <= 0)
         clearing = false;
 }

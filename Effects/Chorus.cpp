@@ -5,14 +5,12 @@ using namespace CustomEffects;
 
 constexpr float TWO_PI_F = 6.28318530717958647692f;
 
-namespace
-{
-    DSY_SDRAM_BSS daisysp::DelayLine<float, 1000> left_delay_buffer;
-    DSY_SDRAM_BSS daisysp::DelayLine<float, 1000> right_delay_buffer;
-}
+namespace {
+DSY_SDRAM_BSS daisysp::DelayLine<float, 1000> left_delay_buffer;
+DSY_SDRAM_BSS daisysp::DelayLine<float, 1000> right_delay_buffer;
+} // namespace
 
-void Chorus::Init(float sample_rate)
-{
+void Chorus::Init(float sample_rate) {
     sampling_freq = sample_rate;
     rate = 1.0f;
     depth = 3.0f;
@@ -30,8 +28,7 @@ void Chorus::Init(float sample_rate)
     cos_increment = cosf(phase_increment);
 }
 
-void Chorus::Process(float inL, float inR, float &outL, float &outR)
-{
+void Chorus::Process(float inL, float inR, float &outL, float &outR) {
     float samples_per_ms = sampling_freq * 0.001f;
     float left_delay_samples = (base_delay + lfo_sin * depth) * samples_per_ms;
 
@@ -59,34 +56,27 @@ void Chorus::Process(float inL, float inR, float &outL, float &outR)
     lfo_cos = new_cos;
 }
 
-void Chorus::setDepth(float amount)
-{
-    depth = amount;
-}
+void Chorus::setDepth(float amount) { depth = amount; }
 
-void Chorus::setRate(float freq)
-{
+void Chorus::setRate(float freq) {
     if (fabsf(freq - rate) > 0.001f)
         phase_increment = (TWO_PI_F * freq) / sampling_freq;
     rate = freq;
 }
 
-void Chorus::SoftReset()
-{
+void Chorus::SoftReset() {
     clearing = true;
     clear_samples_remaining = 700;
 }
 
-void Chorus::ClearStep()
-{
-    if(!clearing)
+void Chorus::ClearStep() {
+    if (!clearing)
         return;
 
     constexpr int CLEAR_PER_CALL = 8;
 
     int amount = CLEAR_PER_CALL;
 
-    if(clear_samples_remaining < amount)
+    if (clear_samples_remaining < amount)
         amount = clear_samples_remaining;
-
 }

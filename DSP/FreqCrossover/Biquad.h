@@ -6,10 +6,8 @@
 #include <daisysp.h>
 #ifdef __cplusplus
 
-namespace CustomDSP
-{
-class Biquad
-{
+namespace CustomDSP {
+class Biquad {
   public:
     void SetLowPass(float sample_rate, float cutoff, float q);
     void SetHighPass(float sample_rate, float cutoff, float q);
@@ -28,7 +26,7 @@ class Biquad
     float z1 = 0.0f;
     float z2 = 0.0f;
 };
-}
+} // namespace CustomDSP
 
 #endif
 #endif

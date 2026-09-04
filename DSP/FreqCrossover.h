@@ -2,18 +2,17 @@
 #ifndef FREQCROSSOVER_DSP
 #define FREQCROSSOVER_DSP
 
-#include <cmath>
 #include "../DSP/FreqCrossover/Biquad.h"
+#include <cmath>
 #ifdef __cplusplus
 
-namespace CustomDSP
-{
-class FreqCrossover
-{
+namespace CustomDSP {
+class FreqCrossover {
   public:
     void Init(float sample_rate, float crossover_freq);
 
-    void Process(float inL, float inR, float &low_outL, float &high_outL, float &low_outR, float &high_outR);
+    void Process(float inL, float inR, float &low_outL, float &high_outL, float &low_outR,
+                 float &high_outR);
 
     void SetCrossoverFreq(float freq);
 
@@ -32,6 +31,6 @@ class FreqCrossover
 
     float sampling_freq;
 };
-}
+} // namespace CustomDSP
 #endif
 #endif

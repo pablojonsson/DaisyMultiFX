@@ -1,9 +1,7 @@
 #include "DiffuserMath.h"
 
-namespace CustomDSP
-{
-void DiffuserMath::Hadamard(float x[8])
-{
+namespace CustomDSP {
+void DiffuserMath::Hadamard(float x[8]) {
     float a0 = x[0] + x[1];
     float a1 = x[0] - x[1];
     float a2 = x[2] + x[3];
@@ -35,12 +33,10 @@ void DiffuserMath::Hadamard(float x[8])
 }
 
 void DiffuserMath::Process(float inL, float inR, float feedback, const float delayed[8],
-                           float writes[8], float &outL, float &outR)
-{
+                           float writes[8], float &outL, float &outR) {
     float s[8];
 
-    for (int i = 0; i < 8; i++)
-    {
+    for (int i = 0; i < 8; i++) {
         s[i] = delayed[i];
     }
 

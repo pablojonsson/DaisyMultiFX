@@ -5,18 +5,11 @@
 #include <daisysp.h>
 
 #ifdef __cplusplus
-namespace CustomDSP
-{
+namespace CustomDSP {
 
-enum class FilterMode
-{
-    LowPass,
-    BandPass,
-    HighPass
-};
+enum class FilterMode { LowPass, BandPass, HighPass };
 
-struct SVFOutput
-{
+struct SVFOutput {
     float lowL;
     float bandL;
     float highL;
@@ -26,16 +19,14 @@ struct SVFOutput
     float highR;
 };
 
-struct SVFStage
-{
+struct SVFStage {
     float state1L = 0.0f;
     float state2L = 0.0f;
 
     float state1R = 0.0f;
     float state2R = 0.0f;
 
-    void Reset()
-    {
+    void Reset() {
         state1L = 0.0f;
         state2L = 0.0f;
 
@@ -44,8 +35,7 @@ struct SVFStage
     }
 };
 
-class StateVariableFilter
-{
+class StateVariableFilter {
   public:
     StateVariableFilter() = default;
 

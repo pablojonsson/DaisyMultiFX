@@ -5,10 +5,8 @@
 #include <daisysp.h>
 
 #ifdef __cplusplus
-namespace CustomDSP
-{
-class AllPass
-{
+namespace CustomDSP {
+class AllPass {
   public:
     AllPass(){};
     ~AllPass(){};

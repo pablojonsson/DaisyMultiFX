@@ -5,32 +5,29 @@
 #include "../DSP/StateVariableFilter.h"
 #ifdef __cplusplus
 
-namespace CustomEffects
-{
-    class Distortion
-    {
-    public:
-        Distortion() {};
-        ~Distortion() {};
+namespace CustomEffects {
+class Distortion {
+  public:
+    Distortion(){};
+    ~Distortion(){};
 
-        void Init(float sample_rate);
+    void Init(float sample_rate);
 
-        float Process(float in);
+    float Process(float in);
 
-        void SetDrive(float amount);
+    void SetDrive(float amount);
 
-        void SetTone(float amount);
+    void SetTone(float amount);
 
-    private:
-        float drive;
-        float tone;
-        float sampling_freq;
+  private:
+    float drive;
+    float tone;
+    float sampling_freq;
 
-        CustomDSP::StateVariableFilter input_hpf;
-        CustomDSP::StateVariableFilter tone_lpf;
-        CustomDSP::StateVariableFilter tone_hpf;
-
-    };
-}
+    CustomDSP::StateVariableFilter input_hpf;
+    CustomDSP::StateVariableFilter tone_lpf;
+    CustomDSP::StateVariableFilter tone_hpf;
+};
+} // namespace CustomEffects
 #endif
 #endif

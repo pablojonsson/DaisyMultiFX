@@ -3,14 +3,13 @@
 
 using namespace CustomEffects;
 
-void Phaser::Init(float sample_rate)
-{
+void Phaser::Init(float sample_rate) {
     sampling_freq = sample_rate;
 
-    rate     = 0.5f;
-    depth    = 0.7f;
+    rate = 0.5f;
+    depth = 0.7f;
     feedback = 0.4f;
-    mix      = 0.5f;
+    mix = 0.5f;
 
     lfo_phase = 0.0f;
 
@@ -22,12 +21,11 @@ void Phaser::Init(float sample_rate)
     Reset();
 }
 
-float Phaser::FrequencyToCoefficient(float frequency)
-{
-    if(frequency < 20.0f)
+float Phaser::FrequencyToCoefficient(float frequency) {
+    if (frequency < 20.0f)
         frequency = 20.0f;
 
-    if(frequency > sampling_freq * 0.45f)
+    if (frequency > sampling_freq * 0.45f)
         frequency = sampling_freq * 0.45f;
 
     float t = tanf(3.14159265359f * frequency / sampling_freq);
@@ -35,10 +33,8 @@ float Phaser::FrequencyToCoefficient(float frequency)
     return (1.0f - t) / (1.0f + t);
 }
 
-void Phaser::Process(float inL, float inR, float &outL, float &outR)
-{
-    if(control_counter == 0)
-    {
+void Phaser::Process(float inL, float inR, float &outL, float &outR) {
+    if (control_counter == 0) {
         float lfoL = sinf(lfo_phase);
         float lfoR = cosf(lfo_phase);
 
@@ -66,7 +62,7 @@ void Phaser::Process(float inL, float inR, float &outL, float &outR)
 
     control_counter++;
 
-    if(control_counter >= CONTROL_DIV)
+    if (control_counter >= CONTROL_DIV)
         control_counter = 0;
 
     float wetL = inL + feedbackL * feedback;
@@ -90,57 +86,51 @@ void Phaser::Process(float inL, float inR, float &outL, float &outR)
 
     lfo_phase += phase_increment;
 
-    if(lfo_phase >= 2.0f * PI_F)
+    if (lfo_phase >= 2.0f * PI_F)
         lfo_phase -= 2.0f * PI_F;
 }
 
-void Phaser::SetRate(float new_rate)
-{
+void Phaser::SetRate(float new_rate) {
     rate = new_rate;
 
     phase_increment = 2 * PI_F * rate / sampling_freq;
 }
 
-void Phaser::SetDepth(float new_depth)
-{
-    if(new_depth < 0.0f)
+void Phaser::SetDepth(float new_depth) {
+    if (new_depth < 0.0f)
         new_depth = 0.0f;
-    else if(new_depth > 1.0f)
+    else if (new_depth > 1.0f)
         new_depth = 1.0f;
 
     depth = new_depth;
 }
 
-void Phaser::SetFeedback(float new_feedback)
-{
-    if(new_feedback < -0.95f)
+void Phaser::SetFeedback(float new_feedback) {
+    if (new_feedback < -0.95f)
         new_feedback = -0.95f;
-    else if(new_feedback > 0.95f)
+    else if (new_feedback > 0.95f)
         new_feedback = 0.95f;
 
     feedback = new_feedback;
 }
 
-void Phaser::SetMix(float new_mix)
-{
-    if(new_mix < 0.0f)
+void Phaser::SetMix(float new_mix) {
+    if (new_mix < 0.0f)
         new_mix = 0.0f;
-    else if(new_mix > 1.0f)
+    else if (new_mix > 1.0f)
         new_mix = 1.0f;
 
     mix = new_mix;
 }
 
-void Phaser::Reset()
-{
+void Phaser::Reset() {
     feedbackL = 0.0f;
     feedbackR = 0.0f;
 
     lfo_phase = 0.0f;
     control_counter = 0;
 
-    for(int i = 0; i < 4; i++)
-    {
+    for (int i = 0; i < 4; i++) {
         stagesL[i].Reset();
         stagesR[i].Reset();
     }

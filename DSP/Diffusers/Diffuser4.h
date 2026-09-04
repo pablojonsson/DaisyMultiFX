@@ -6,10 +6,8 @@
 #include "daisysp.h"
 
 #ifdef __cplusplus
-namespace CustomDSP
-{
-class Diffuser4
-{
+namespace CustomDSP {
+class Diffuser4 {
   public:
     Diffuser4(){};
     ~Diffuser4(){};
@@ -27,7 +25,7 @@ class Diffuser4
 
     float sampling_freq;
     float feedback = 0.5f;
-    
+
     daisysp::DelayLine<float, 74> delay_1;
     daisysp::DelayLine<float, 90> delay_2;
     daisysp::DelayLine<float, 108> delay_3;

@@ -2,16 +2,14 @@
 
 using namespace CustomEffects;
 
-void Overdrive::Init(float sample_rate)
-{
+void Overdrive::Init(float sample_rate) {
     sampling_freq = sample_rate;
     drive = .5f;
     volume = .7f;
     tone_cutoff = 20000;
 }
 
-float Overdrive::Process(float in)
-{
+float Overdrive::Process(float in) {
     float x = drive * in;
 
     if (x > 1.0f)
@@ -24,12 +22,6 @@ float Overdrive::Process(float in)
     return out * volume;
 }
 
-void Overdrive::setDrive(float amount)
-{
-    drive = amount;
-}
+void Overdrive::setDrive(float amount) { drive = amount; }
 
-void Overdrive::setVolume(float amount)
-{
-    volume = amount;
-}
+void Overdrive::setVolume(float amount) { volume = amount; }

@@ -4,8 +4,7 @@ using namespace CustomDSP;
 
 constexpr float TWO_PI_F = 6.28318530717958647692f;
 
-void ReverbFeedback::Init(float sample_rate)
-{
+void ReverbFeedback::Init(float sample_rate) {
     sampling_freq = sample_rate;
 
     delay_1.Init();
@@ -30,23 +29,19 @@ void ReverbFeedback::Init(float sample_rate)
 
     const float rates[8] = {0.11f, 0.13f, 0.17f, 0.19f, 0.23f, 0.29f, 0.31f, 0.37f};
 
-    for (int i = 0; i < 8; i++)
-    {
+    for (int i = 0; i < 8; i++) {
         lfo_phase[i] = 0.0f;
         filter[i] = 0.0f;
         phase_increment[i] = TWO_PI_F * rates[i] / sampling_freq;
     }
 }
 
-void ReverbFeedback::Process(float inL, float inR, float &outL, float &outR)
-{
-    if(mod_counter == 0)
-    {
-        for(int i = 0; i < 8; i++)
-        {
+void ReverbFeedback::Process(float inL, float inR, float &outL, float &outR) {
+    if (mod_counter == 0) {
+        for (int i = 0; i < 8; i++) {
             lfo_phase[i] += phase_increment[i] * MOD_UPDATE_DIV;
 
-            if(lfo_phase[i] >= TWO_PI_F)
+            if (lfo_phase[i] >= TWO_PI_F)
                 lfo_phase[i] -= TWO_PI_F;
         }
 
@@ -71,7 +66,7 @@ void ReverbFeedback::Process(float inL, float inR, float &outL, float &outR)
 
     mod_counter++;
 
-    if(mod_counter >= MOD_UPDATE_DIV)
+    if (mod_counter >= MOD_UPDATE_DIV)
         mod_counter = 0;
 
     float d1 = delay_1.Read();
@@ -87,8 +82,7 @@ void ReverbFeedback::Process(float inL, float inR, float &outL, float &outR)
 
     DiffuserMath::Hadamard(fb);
 
-    for(int i = 0; i < 8; i++)
-    {
+    for (int i = 0; i < 8; i++) {
         filter[i] += damping * (fb[i] - filter[i]);
     }
 
@@ -105,20 +99,12 @@ void ReverbFeedback::Process(float inL, float inR, float &outL, float &outR)
     outR = (-d1 + d2 + d3 - d4 + d5 + d6 - d7 + d8) * 0.353553f;
 }
 
-void ReverbFeedback::setFeedback(float amount)
-{
-    feedback = amount;
-}
+void ReverbFeedback::setFeedback(float amount) { feedback = amount; }
 
-void ReverbFeedback::setDamping(float amount)
-{
-    damping = amount;
-}
+void ReverbFeedback::setDamping(float amount) { damping = amount; }
 
-void ReverbFeedback::SoftReset()
-{
-    for(int i = 0; i < 8; i++)
-    {
+void ReverbFeedback::SoftReset() {
+    for (int i = 0; i < 8; i++) {
         lfo_phase[i] = 0.0f;
         filter[i] = 0.0f;
     }
@@ -129,20 +115,18 @@ void ReverbFeedback::SoftReset()
     clear_samples_remaining = 3000;
 }
 
-void ReverbFeedback::ClearStep()
-{
-    if(!clearing)
+void ReverbFeedback::ClearStep() {
+    if (!clearing)
         return;
 
     constexpr int CLEAR_PER_CALL = 8;
 
     int amount = CLEAR_PER_CALL;
 
-    if(clear_samples_remaining < amount)
+    if (clear_samples_remaining < amount)
         amount = clear_samples_remaining;
 
-    for(int i = 0; i < amount; i++)
-    {
+    for (int i = 0; i < amount; i++) {
         delay_1.Write(0.0f);
         delay_2.Write(0.0f);
         delay_3.Write(0.0f);
@@ -155,13 +139,11 @@ void ReverbFeedback::ClearStep()
 
     clear_samples_remaining -= amount;
 
-    if(clear_samples_remaining <= 0)
+    if (clear_samples_remaining <= 0)
         clearing = false;
 }
 
-
-void ReverbFeedback::HardReset()
-{
+void ReverbFeedback::HardReset() {
     delay_1.Reset();
     delay_2.Reset();
     delay_3.Reset();

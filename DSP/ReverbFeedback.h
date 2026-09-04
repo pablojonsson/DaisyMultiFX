@@ -7,17 +7,11 @@
 #include <array>
 
 #ifdef __cplusplus
-namespace CustomDSP
-{
-class ReverbFeedback
-{
+namespace CustomDSP {
+class ReverbFeedback {
   public:
-    ReverbFeedback()
-    {
-    }
-    ~ReverbFeedback()
-    {
-    }
+    ReverbFeedback() {}
+    ~ReverbFeedback() {}
 
     void Init(float sample_rate);
 
@@ -28,7 +22,7 @@ class ReverbFeedback
     void setDamping(float amount);
 
     void HardReset();
-    
+
     void SoftReset();
 
     void ClearStep();

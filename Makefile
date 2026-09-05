@@ -3,6 +3,7 @@ TARGET = EffectPedal
 
 # Sources
 CPP_SOURCES = EffectPedal.cpp \
+              Engine/AudioEngine.cpp \
               Effects/Overdrive.cpp \
 			  Effects/Distortion.cpp \
               Effects/Chorus.cpp \

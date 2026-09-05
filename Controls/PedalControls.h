@@ -2,9 +2,8 @@
 #ifndef PEDAL_CONTROLS_H
 #define PEDAL_CONTROLS_H
 
+#include "../Effects/EffectTypes.h"
 #include "daisy_seed.h"
-
-enum class Effect { Distortion, Overdrive, Chorus, Reverb, Phaser, Filter, Delay, None, Count };
 
 class PedalControls {
   public:

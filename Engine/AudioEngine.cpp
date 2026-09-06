@@ -1,6 +1,7 @@
 #include "AudioEngine.h"
 
-void AudioEngine::Init(float sample_rate) {
+void AudioEngine::Init(float sample_rate)
+{
     distortion.Init(sample_rate);
     overdrive.Init(sample_rate);
     chorus.Init(sample_rate);
@@ -9,19 +10,32 @@ void AudioEngine::Init(float sample_rate) {
     delay.Init(sample_rate);
     svf.Init(sample_rate);
     svf.SetMode(CustomDSP::FilterMode::LowPass);
+    crossover.Init(sample_rate, 1000.0);
+
+    routing_mode = RoutingMode::Series;
+
+    split_position = 0;
+    join_position = NUM_EFFECT_SLOTS;
+
     for (int i = 0; i < NUM_EFFECT_SLOTS; i++)
+    {
         slots[i] = Effect::None;
+        slot_branch[i] = Branch::High;
+    }
 }
 
-void AudioEngine::SetSlotEffect(int slot, Effect effect) {
+void AudioEngine::SetSlotEffect(int slot, Effect effect)
+{
     if (slot < 0 || slot >= NUM_EFFECT_SLOTS)
         return;
 
     slots[slot] = effect;
 }
 
-bool AudioEngine::IsEffectActive(Effect effect) const {
-    for (int i = 0; i < NUM_EFFECT_SLOTS; i++) {
+bool AudioEngine::IsEffectActive(Effect effect) const
+{
+    for (int i = 0; i < NUM_EFFECT_SLOTS; i++)
+    {
         if (slots[i] == effect)
             return true;
     }
@@ -29,61 +43,85 @@ bool AudioEngine::IsEffectActive(Effect effect) const {
     return false;
 }
 
-void AudioEngine::ProcessEffect(Effect curr_effect, float inL, float inR, float &outL,
-                                float &outR) {
-    switch (curr_effect) {
-    case Effect::Overdrive: {
+void AudioEngine::ProcessEffect(Effect curr_effect, float inL, float inR, float &outL, float &outR)
+{
+    switch (curr_effect)
+    {
+    case Effect::Overdrive:
+    {
         outL = overdrive.Process(inL);
         outR = overdrive.Process(inR);
 
         break;
     }
 
-    case Effect::Distortion: {
+    case Effect::Distortion:
+    {
         outL = distortion.Process(inL);
         outR = distortion.Process(inR);
 
         break;
     }
 
-    case Effect::Chorus: {
+    case Effect::Chorus:
+    {
         chorus.Process(inL, inR, outL, outR);
         break;
     }
 
-    case Effect::Reverb: {
+    case Effect::Reverb:
+    {
         reverb.Process(inL, inR, outL, outR);
         break;
     }
 
-    case Effect::Filter: {
+    case Effect::Filter:
+    {
         svf.Process(inL, inR, outL, outR);
         break;
     }
 
-    case Effect::Delay: {
+    case Effect::Delay:
+    {
         delay.Process(inL, inR, outL, outR);
         break;
     }
 
-    case Effect::Phaser: {
+    case Effect::Phaser:
+    {
         phaser.Process(inL, inR, outL, outR);
         break;
     }
 
     case Effect::None:
-    default: {
+    default:
+    {
         outL = inL;
         outR = inR;
         break;
     }
     }
 }
-void AudioEngine::Process(float inL, float inR, float &outL, float &outR) {
+
+void AudioEngine::Process(float inL, float inR, float &outL, float &outR)
+{
+    if (routing_mode == RoutingMode::Series)
+    {
+        ProcessSeries(inL, inR, outL, outR);
+    }
+    else
+    {
+        ProcessSplit(inL, inR, outL, outR);
+    }
+}
+
+void AudioEngine::ProcessSeries(float inL, float inR, float &outL, float &outR)
+{
     float currentL = inL;
     float currentR = inR;
 
-    for (int slot = 0; slot < NUM_EFFECT_SLOTS; slot++) {
+    for (int slot = 0; slot < NUM_EFFECT_SLOTS; slot++)
+    {
         float nextL;
         float nextR;
 
@@ -97,8 +135,72 @@ void AudioEngine::Process(float inL, float inR, float &outL, float &outR) {
     outR = currentR;
 }
 
-void AudioEngine::ResetEffect(Effect effect) {
-    switch (effect) {
+void AudioEngine::ProcessSplit(float inL, float inR, float &outL, float &outR)
+{
+    float preL = inL;
+    float preR = inR;
+
+    for (int slot = 0; slot < split_position; ++slot)
+    {
+        float nextL;
+        float nextR;
+
+        ProcessEffect(slots[slot], preL, preR, nextL, nextR);
+
+        preL = nextL;
+        preR = nextR;
+    }
+
+    float lowL, lowR;
+    float highL, highR;
+
+    crossover.Process(preL, preR, lowL, highL, lowR, highR);
+
+    for (int slot = split_position; slot < join_position; ++slot)
+    {
+        if (slot_branch[slot] == Branch::High)
+        {
+            float nextL;
+            float nextR;
+
+            ProcessEffect(slots[slot], highL, highR, nextL, nextR);
+
+            highL = nextL;
+            highR = nextR;
+        }
+        else
+        {
+            float nextL;
+            float nextR;
+
+            ProcessEffect(slots[slot], lowL, lowR, nextL, nextR);
+
+            lowL = nextL;
+            lowR = nextR;
+        }
+    }
+
+    float postL = lowL + highL;
+    float postR = lowR + highR;
+
+    for (int slot = join_position; slot < NUM_EFFECT_SLOTS; ++slot)
+    {
+        float nextL, nextR;
+
+        ProcessEffect(slots[slot], postL, postR, nextL, nextR);
+
+        postL = nextL;
+        postR = nextR;
+    }
+
+    outL = postL;
+    outR = postR;
+}
+
+void AudioEngine::ResetEffect(Effect effect)
+{
+    switch (effect)
+    {
     case Effect::Chorus:
         chorus.SoftReset();
         break;
@@ -124,7 +226,8 @@ void AudioEngine::ResetEffect(Effect effect) {
     }
 }
 
-void AudioEngine::ServiceInactiveEffects() {
+void AudioEngine::ServiceInactiveEffects()
+{
     if (!IsEffectActive(Effect::Reverb))
         reverb.ClearStep();
 
@@ -136,12 +239,16 @@ void AudioEngine::ServiceInactiveEffects() {
 }
 
 void AudioEngine::UpdateSlotParameters(int slot, float pot1, float pot2, bool pot1_changed,
-                                       bool pot2_changed) {
+                                       bool pot2_changed)
+{
     Effect effect = slots[slot];
 
-    switch (effect) {
-    case Effect::Distortion: {
-        if (pot1_changed) {
+    switch (effect)
+    {
+    case Effect::Distortion:
+    {
+        if (pot1_changed)
+        {
             float drive = 2.0f + 58.0f * (pot1 * pot1);
 
             distortion.SetDrive(drive);
@@ -153,8 +260,10 @@ void AudioEngine::UpdateSlotParameters(int slot, float pot1, float pot2, bool po
         break;
     }
 
-    case Effect::Overdrive: {
-        if (pot1_changed) {
+    case Effect::Overdrive:
+    {
+        if (pot1_changed)
+        {
             float drive = 1.0f + pot1 * 14.0f;
 
             overdrive.setDrive(drive);
@@ -166,15 +275,18 @@ void AudioEngine::UpdateSlotParameters(int slot, float pot1, float pot2, bool po
         break;
     }
 
-    case Effect::Chorus: {
-        if (pot1_changed) {
+    case Effect::Chorus:
+    {
+        if (pot1_changed)
+        {
             float shaped = pot1 * pot1;
             float rate = 0.2f + shaped * 14.8f;
 
             chorus.setRate(rate);
         }
 
-        if (pot2_changed) {
+        if (pot2_changed)
+        {
             float depth = 0.1f + pot2 * 2.4f;
 
             chorus.setDepth(depth);
@@ -183,8 +295,10 @@ void AudioEngine::UpdateSlotParameters(int slot, float pot1, float pot2, bool po
         break;
     }
 
-    case Effect::Reverb: {
-        if (pot1_changed) {
+    case Effect::Reverb:
+    {
+        if (pot1_changed)
+        {
             float shaped = pot1 * pot1;
             float decay_time = 0.3f + shaped * 19.7f;
 
@@ -201,7 +315,8 @@ void AudioEngine::UpdateSlotParameters(int slot, float pot1, float pot2, bool po
             reverb.setFeedback(feedback);
         }
 
-        if (pot2_changed) {
+        if (pot2_changed)
+        {
             float damping = 0.45f - pot2 * 0.40f;
 
             reverb.setDamping(damping);
@@ -210,8 +325,10 @@ void AudioEngine::UpdateSlotParameters(int slot, float pot1, float pot2, bool po
         break;
     }
 
-    case Effect::Phaser: {
-        if (pot1_changed) {
+    case Effect::Phaser:
+    {
+        if (pot1_changed)
+        {
             float rate = 0.05f * powf(100.0f, pot1);
 
             phaser.SetRate(rate);
@@ -223,8 +340,10 @@ void AudioEngine::UpdateSlotParameters(int slot, float pot1, float pot2, bool po
         break;
     }
 
-    case Effect::Filter: {
-        if (pot1_changed) {
+    case Effect::Filter:
+    {
+        if (pot1_changed)
+        {
             float x2 = pot1 * pot1;
             float x4 = x2 * x2;
 
@@ -233,7 +352,8 @@ void AudioEngine::UpdateSlotParameters(int slot, float pot1, float pot2, bool po
             svf.SetCutoff(cutoff);
         }
 
-        if (pot2_changed) {
+        if (pot2_changed)
+        {
             float shaped = pot2 * pot2;
             float q = 0.5f + shaped * 9.5f;
 
@@ -243,8 +363,10 @@ void AudioEngine::UpdateSlotParameters(int slot, float pot1, float pot2, bool po
         break;
     }
 
-    case Effect::Delay: {
-        if (pot1_changed) {
+    case Effect::Delay:
+    {
+        if (pot1_changed)
+        {
             float shaped = pot1 * pot1;
 
             float delay_ms = 20.0f + shaped * 475.0f;
@@ -252,7 +374,8 @@ void AudioEngine::UpdateSlotParameters(int slot, float pot1, float pot2, bool po
             delay.SetDelayTime(delay_ms);
         }
 
-        if (pot2_changed) {
+        if (pot2_changed)
+        {
             float feedback = pot2 * 0.95f;
 
             delay.SetFeedback(feedback);
@@ -265,4 +388,50 @@ void AudioEngine::UpdateSlotParameters(int slot, float pot1, float pot2, bool po
     default:
         break;
     }
+}
+
+void AudioEngine::SetRoutingMode(RoutingMode mode)
+{
+    routing_mode = mode;
+}
+
+void AudioEngine::SetSplitPosition(int position)
+{
+    if (position < 0)
+        position = 0;
+
+    if (position > NUM_EFFECT_SLOTS - 1)
+        position = NUM_EFFECT_SLOTS - 1;
+
+    split_position = position;
+
+    if (join_position <= split_position)
+        join_position = split_position + 1;
+}
+
+void AudioEngine::SetJoinPosition(int position)
+{
+    if (position < 1)
+        position = 1;
+
+    if (position > NUM_EFFECT_SLOTS)
+        position = NUM_EFFECT_SLOTS;
+
+    join_position = position;
+
+    if (split_position >= join_position)
+        split_position = join_position - 1;
+}
+
+void AudioEngine::SetSlotBranch(int slot, Branch branch)
+{
+    if (slot < 0 || slot >= NUM_EFFECT_SLOTS)
+        return;
+
+    slot_branch[slot] = branch;
+}
+
+void AudioEngine::SetSplitFrequency(float frequency)
+{
+    crossover.SetCrossoverFreq(frequency);
 }

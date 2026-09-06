@@ -15,11 +15,13 @@ PedalControls controls;
 
 static constexpr int NUM_EFFECT_SLOTS = 4;
 
-void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t size) {
+void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t size)
+{
 
     controls.Update();
 
-    for (int slot = 0; slot < AudioEngine::NUM_EFFECT_SLOTS; slot++) {
+    for (int slot = 0; slot < AudioEngine::NUM_EFFECT_SLOTS; slot++)
+    {
         Effect effect = controls.GetEffect(slot);
 
         engine.SetSlotEffect(slot, effect);
@@ -30,20 +32,24 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
 
     Effect old_effect;
 
-    for (int slot = 0; slot < AudioEngine::NUM_EFFECT_SLOTS; slot++) {
-        if (controls.ConsumeResetRequest(slot, old_effect)) {
+    for (int slot = 0; slot < AudioEngine::NUM_EFFECT_SLOTS; slot++)
+    {
+        if (controls.ConsumeResetRequest(slot, old_effect))
+        {
             engine.ResetEffect(old_effect);
         }
     }
 
-    for (size_t i = 0; i < size; i++) {
+    for (size_t i = 0; i < size; i++)
+    {
         engine.Process(in[0][i], in[1][i], out[0][i], out[1][i]);
     }
 
     engine.ServiceInactiveEffects();
 }
 
-int main(void) {
+int main(void)
+{
     hw.Init();
 
     hw.SetAudioBlockSize(16);
@@ -55,6 +61,7 @@ int main(void) {
 
     hw.StartAudio(AudioCallback);
 
-    while (1) {
+    while (1)
+    {
     }
 }
